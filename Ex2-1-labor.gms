@@ -5,7 +5,7 @@ Modifies Example to add a labor constraint
 
 THE PROBLEM:
 
-An irrigated farm can be planted in two crops:  eggplants and tomatoes.  Data are as fol-lows:
+An irrigated farm can be planted in two crops  :  eggplants and tomatoes.  Data are as fol-lows:
 
 Seasonal Resource
 Inputs or Profit        Crops        Resource
