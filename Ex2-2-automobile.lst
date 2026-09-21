@@ -1,0 +1,206 @@
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 09/20/26 21:12:26 Page 1
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+   1  * 1. DEFINE the SETS
+   2  SETS cars  car produced /Coup, Minivan/
+   3       res resources /Metal, Circuit, Labor/;
+   4   
+   5  * 2. DEFINE input data
+   6  PARAMETERS
+   7     c(cars) Objective function coefficients ($ per plant)
+   8           /Coup 6000,
+   9           Minivan 7000 /
+  10   
+  11     b(res) Right hand constraint values (per resource)
+  12            /Metal 4000000,
+  13             Circuit  12000,
+  14             Labor  17500/;
+  15   
+  16  TABLE A(cars,res) Left hand side constraint coefficients
+  17                   Metal    Circuit  Labor
+  18   Coup           1000      4        5
+  19   Minivan        2000      3        2.5;
+  20   
+  21   
+  22  * 3. DEFINE the variables
+  23  VARIABLES X(cars) cars produced (Number)
+  24            VPROFIT  total profit ($);
+  25   
+  26  * Non-negativity constraints
+  27  POSITIVE VARIABLES X;
+  28   
+  29  * 4. COMBINE variables and data in equations
+  30  EQUATIONS
+  31     PROFIT Total profit ($) and objective function value
+  32     RES_CONSTRAIN(res) Resource Constraints;
+  33   
+  34  PROFIT..                 VPROFIT =E= SUM(cars, c(cars)*X(cars));
+  35  RES_CONSTRAIN(res) ..    SUM(cars, A(cars,res)*X(cars)) =L= b(res);
+  36   
+  37   
+  38  * 5. DEFINE the MODEL from the EQUATIONS
+  39  MODEL PRODUCTION /PROFIT, RES_CONSTRAIN/;
+  40  *Altnerative way to write (include all previously defined equations)
+  41  *MODEL PLANTING /ALL/;
+  42   
+  43   
+  44  * 6. SOLVE the MODEL
+  45  * Solve the PLANTING model using a Linear Programming Solver (see File=>Options=>Solvers)
+  46  *     to maximize VPROFIT
+  47  SOLVE PRODUCTION USING LP MAXIMIZING VPROFIT;
+  48   
+  49   
+  50  * 6. CLick File menu => RUN (F9) or Solve icon and examine solution report in .LST file
+
+
+COMPILATION TIME     =        0.000 SECONDS      3 MB  54.4.0 9a60ae27 DAX-DAC
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 09/20/26 21:12:26 Page 2
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Equation Listing    SOLVE PRODUCTION Using LP From line 47
+
+
+---- PROFIT  =E=  Total profit ($) and objective function value
+
+PROFIT..  - 6000*X(Coup) - 7000*X(Minivan) + VPROFIT =E= 0 ; (LHS = 0)
+     
+
+---- RES_CONSTRAIN  =L=  Resource Constraints
+
+RES_CONSTRAIN(Metal)..  1000*X(Coup) + 2000*X(Minivan) =L= 4000000 ; (LHS = 0)
+     
+RES_CONSTRAIN(Circuit)..  4*X(Coup) + 3*X(Minivan) =L= 12000 ; (LHS = 0)
+     
+RES_CONSTRAIN(Labor)..  5*X(Coup) + 2.5*X(Minivan) =L= 17500 ; (LHS = 0)
+     
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 09/20/26 21:12:26 Page 3
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Column Listing      SOLVE PRODUCTION Using LP From line 47
+
+
+---- X  cars produced (Number)
+
+X(Coup)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+    -6000       PROFIT
+     1000       RES_CONSTRAIN(Metal)
+        4       RES_CONSTRAIN(Circuit)
+        5       RES_CONSTRAIN(Labor)
+
+X(Minivan)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+    -7000       PROFIT
+     2000       RES_CONSTRAIN(Metal)
+        3       RES_CONSTRAIN(Circuit)
+        2.5     RES_CONSTRAIN(Labor)
+
+
+---- VPROFIT  total profit ($)
+
+VPROFIT
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       PROFIT
+
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 09/20/26 21:12:26 Page 4
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Range Statistics    SOLVE PRODUCTION Using LP From line 47
+
+
+RANGE STATISTICS (ABSOLUTE NON-ZERO FINITE VALUES)
+
+RHS       [min, max] : [ 1.200E+04, 4.000E+06] - Zero values observed as well
+Bound     [min, max] : [        NA,        NA] - Zero values observed as well
+Matrix    [min, max] : [ 1.000E+00, 7.000E+03]
+
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 09/20/26 21:12:26 Page 5
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Model Statistics    SOLVE PRODUCTION Using LP From line 47
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           2     SINGLE EQUATIONS            4
+BLOCKS OF VARIABLES           2     SINGLE VARIABLES            3
+NON ZERO ELEMENTS             9
+
+
+GENERATION TIME      =        0.006 SECONDS      4 MB  54.4.0 9a60ae27 DAX-DAC
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 09/20/26 21:12:26 Page 6
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Solution Report     SOLVE PRODUCTION Using LP From line 47
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   PRODUCTION          OBJECTIVE  VPROFIT
+     TYPE    LP                  DIRECTION  MAXIMIZE
+     SOLVER  CPLEX               FROM LINE  47
+
+**** SOLVER STATUS     1 Normal Completion
+**** MODEL STATUS      1 Optimal
+**** OBJECTIVE VALUE         20000000.0000
+
+ RESOURCE USAGE, LIMIT          0.004 10000000000.000
+ ITERATION COUNT, LIMIT         3    2147483647
+*** This solver runs with a community license.
+--- GMO setup time: 0.00s
+--- GMO memory 0.50 Mb (peak 0.50 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 22.1.2.0 link memory 0.00 Mb (peak 0.00 Mb)
+--- Starting Cplex
+
+
+--- LP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.01 ticks)
+
+
+Optimal solution found
+Objective:     20000000.000000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU PROFIT              .              .              .             1.0000      
+
+  PROFIT  Total profit ($) and objective function value
+
+---- EQU RES_CONSTRAIN  Resource Constraints
+
+               LOWER          LEVEL          UPPER         MARGINAL
+
+Metal          -INF      4000000.0000   4000000.0000         2.0000      
+Circuit        -INF        12000.0000     12000.0000      1000.0000      
+Labor          -INF        14000.0000     17500.0000          .          
+
+---- VAR X  cars produced (Number)
+
+               LOWER          LEVEL          UPPER         MARGINAL
+
+Coup             .          2400.0000        +INF             .          
+Minivan          .           800.0000        +INF             .          
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR VPROFIT           -INF      2.0000000E+7        +INF             .          
+
+  VPROFIT  total profit ($)
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+
+
+EXECUTION TIME       =        0.047 SECONDS      4 MB  54.4.0 9a60ae27 DAX-DAC
+
+
+USER: Course License                                 G260818+0003Ac-GEN
+      Utah State University                                     DCE5615
+      License for teaching and research at degree granting institutions
+
+
+**** FILE SUMMARY
+
+Input      /Users/bashar/Desktop/GAMS/CEE_6410_Rosenberg/CEE-6410-Rosenberg/Ex2-2-automobile.gms
+Output     /Users/bashar/Desktop/GAMS/CEE_6410_Rosenberg/CEE-6410-Rosenberg/Ex2-2-automobile.lst
