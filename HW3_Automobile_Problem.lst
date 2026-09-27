@@ -1,0 +1,270 @@
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 09/26/26 18:47:41 Page 1
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+      CEE 6410 - Network Shipping Problem - Automobiles
+       
+      An automobile company must decide how to move cars from suppliers in Kansas City and Dallas to dealerships in New York, Minneapolis, Seattle, and San Francisco.
+       
+      THE PROBLEM:
+       
+      Each supplier has a specified number of cars in stock and each dealership has an expected number of sales. Data are as fol-lows:
+       
+       
+      Inputs:    Suppliers   Dealers
+      Cost of each route: Rows are suppliers, Coloumns are dealers.
+                      New York            Minneapolis     Seattle     San Francisco
+      Kansas          $4                  $12             $18         $18
+      Dallas          $9                  $15             $17         $21              
+       
+      Determine the shipping volumes that will minimze cost.
+       
+      THE SOLUTION:
+      Minimize shipping cost.
+       
+      David E Rosenberg
+      david.rosenberg@usu.edu
+      September 15, 2015
+  26   
+  27  * 1. DEFINE the SETS
+  28  SETS suppliers  cars in stock /Kansas, Dallas/
+  29       dealers expected sales /Newyork, Minneapolis, Seattle, Sanfrancisco/;
+  30   
+  31  * 2. DEFINE input data
+  32  PARAMETERS
+  33     c(suppliers) Capacity of cars
+  34           /Kansas 1000,
+  35            Dallas 800 /
+  36   
+  37     b(dealers) Expected sales in quantity of cars
+  38            /Newyork 400,
+  39             Minneapolis  250,
+  40             Seattle  450,
+  41             Sanfrancisco 450/;
+  42   
+  43  TABLE A(suppliers,dealers) Cost of each supplier to dealer route
+  44                   Newyork  Minneapolis  Seattle  Sanfrancisco
+  45   Kansas          4        12           18       18
+  46   Dallas          9        15           17       21;
+  47   
+  48   
+  49  * 3. DEFINE the variables
+  50  VARIABLES
+  51      X(suppliers,dealers) Quantity of cars to send from one supplier to one dealer 8 dimensions total,
+  52      VCOST  total cost ($);
+  53  *X1 From Kansas to Newyork
+  54  *X2 From Kansas to Minneapolis
+  55  *X3 From kansas to Seattle
+  56  *X4 From Kansas to San Francisco
+  57  *Y1 From Dallas to Newyork
+  58  *Y2 From Dallas to Minneapolis
+  59  *Y3 From Dallas to Seattle
+  60  *Y4 From Dallas to San Francicso
+  61   
+  62   
+  63  * Non-negativity constraints
+  64  POSITIVE VARIABLES X;
+  65   
+  66  * 4. COMBINE variables and data in equations
+  67  EQUATIONS
+  68     COST Total cost ($) and objective function value
+  69     RES_CONSTRAIN1(suppliers) constraint of how many cars are in stock for each supplier,RES_CONSTRAIN2(dealers) constraint of minimum number of cars sold by each dealer ;
+  70   
+  71  COST..                 VCOST =E= SUM((suppliers,dealers), A(suppliers,dealers)*X(suppliers,dealers));
+  72  RES_CONSTRAIN1(suppliers) ..    SUM(dealers, X(suppliers,dealers)) =L= c(suppliers);
+  73  RES_CONSTRAIN2(dealers) ..    SUM(suppliers, X(suppliers,dealers)) =G= b(dealers);
+  74   
+  75   
+  76  * 5. DEFINE the MODEL from the EQUATIONS
+  77  MODEL NETWORK /COST, RES_CONSTRAIN1,RES_CONSTRAIN2/;
+  78  *Altnerative way to write (include all previously defined equations)
+  79  *MODEL PLANTING /ALL/;
+  80   
+  81  OPTION LIMROW = 10;
+  82  * 6. SOLVE the MODEL
+  83  * Solve the PLANTING model using a Linear Programming Solver (see File=>Options=>Solvers)
+  84  *     to maximize VPROFIT
+  85  SOLVE NETWORK USING LP MINIMIZING VCOST;
+  86   
+  87   
+  88  * 6. CLick File menu => RUN (F9) or Solve icon and examine solution report in .LST file
+
+
+COMPILATION TIME     =        0.000 SECONDS      3 MB  54.4.0 9a60ae27 DAX-DAC
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 09/26/26 18:47:41 Page 2
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Equation Listing    SOLVE NETWORK Using LP From line 85
+
+
+---- COST  =E=  Total cost ($) and objective function value
+
+COST..  - 4*X(Kansas,Newyork) - 12*X(Kansas,Minneapolis) - 18*X(Kansas,Seattle) - 18*X(Kansas,Sanfrancisco) - 9*X(Dallas,Newyork) - 15*X(Dallas,Minneapolis) - 17*X(Dallas,Seattle) - 21*X(Dallas,Sanfrancisco) + VCOST =E= 0 ; (LHS = 0)
+     
+
+---- RES_CONSTRAIN1  =L=  constraint of how many cars are in stock for each supplier
+
+RES_CONSTRAIN1(Kansas)..  X(Kansas,Newyork) + X(Kansas,Minneapolis) + X(Kansas,Seattle) + X(Kansas,Sanfrancisco) =L= 1000 ; (LHS = 0)
+     
+RES_CONSTRAIN1(Dallas)..  X(Dallas,Newyork) + X(Dallas,Minneapolis) + X(Dallas,Seattle) + X(Dallas,Sanfrancisco) =L= 800 ; (LHS = 0)
+     
+
+---- RES_CONSTRAIN2  =G=  constraint of minimum number of cars sold by each dealer
+
+RES_CONSTRAIN2(Newyork)..  X(Kansas,Newyork) + X(Dallas,Newyork) =G= 400 ; (LHS = 0, INFES = 400 ****)
+     
+RES_CONSTRAIN2(Minneapolis)..  X(Kansas,Minneapolis) + X(Dallas,Minneapolis) =G= 250 ; (LHS = 0, INFES = 250 ****)
+     
+RES_CONSTRAIN2(Seattle)..  X(Kansas,Seattle) + X(Dallas,Seattle) =G= 450 ; (LHS = 0, INFES = 450 ****)
+     
+RES_CONSTRAIN2(Sanfrancisco)..  X(Kansas,Sanfrancisco) + X(Dallas,Sanfrancisco) =G= 450 ; (LHS = 0, INFES = 450 ****)
+     
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 09/26/26 18:47:41 Page 3
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Column Listing      SOLVE NETWORK Using LP From line 85
+
+
+---- X  Quantity of cars to send from one supplier to one dealer 8 dimensions total
+
+X(Kansas,Newyork)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -4       COST
+        1       RES_CONSTRAIN1(Kansas)
+        1       RES_CONSTRAIN2(Newyork)
+
+X(Kansas,Minneapolis)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      -12       COST
+        1       RES_CONSTRAIN1(Kansas)
+        1       RES_CONSTRAIN2(Minneapolis)
+
+X(Kansas,Seattle)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+      -18       COST
+        1       RES_CONSTRAIN1(Kansas)
+        1       RES_CONSTRAIN2(Seattle)
+
+REMAINING 5 ENTRIES SKIPPED
+
+---- VCOST  total cost ($)
+
+VCOST
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       COST
+
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 09/26/26 18:47:41 Page 4
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Range Statistics    SOLVE NETWORK Using LP From line 85
+
+
+RANGE STATISTICS (ABSOLUTE NON-ZERO FINITE VALUES)
+
+RHS       [min, max] : [ 2.500E+02, 1.000E+03] - Zero values observed as well
+Bound     [min, max] : [        NA,        NA] - Zero values observed as well
+Matrix    [min, max] : [ 1.000E+00, 2.100E+01]
+
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 09/26/26 18:47:41 Page 5
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Model Statistics    SOLVE NETWORK Using LP From line 85
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           3     SINGLE EQUATIONS            7
+BLOCKS OF VARIABLES           2     SINGLE VARIABLES            9
+NON ZERO ELEMENTS            25
+
+
+GENERATION TIME      =        0.006 SECONDS      4 MB  54.4.0 9a60ae27 DAX-DAC
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 09/26/26 18:47:41 Page 6
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Solution Report     SOLVE NETWORK Using LP From line 85
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   NETWORK             OBJECTIVE  VCOST
+     TYPE    LP                  DIRECTION  MINIMIZE
+     SOLVER  CPLEX               FROM LINE  85
+
+**** SOLVER STATUS     1 Normal Completion
+**** MODEL STATUS      1 Optimal
+**** OBJECTIVE VALUE            20650.0000
+
+ RESOURCE USAGE, LIMIT          0.004 10000000000.000
+ ITERATION COUNT, LIMIT         5    2147483647
+*** This solver runs with a community license.
+--- GMO setup time: 0.00s
+--- GMO memory 0.50 Mb (peak 0.50 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 22.1.2.0 link memory 0.00 Mb (peak 0.00 Mb)
+--- Starting Cplex
+
+
+--- LP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.01 ticks)
+
+
+Optimal solution found
+Objective:        20650.000000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU COST                .              .              .             1.0000      
+
+  COST  Total cost ($) and objective function value
+
+---- EQU RES_CONSTRAIN1  constraint of how many cars are in stock for each supplier
+
+              LOWER          LEVEL          UPPER         MARGINAL
+
+Kansas        -INF         1000.0000      1000.0000        -3.0000      
+Dallas        -INF          550.0000       800.0000          .          
+
+---- EQU RES_CONSTRAIN2  constraint of minimum number of cars sold by each dealer
+
+                    LOWER          LEVEL          UPPER         MARGINAL
+
+Newyork            400.0000       400.0000        +INF            7.0000      
+Minneapolis        250.0000       250.0000        +INF           15.0000      
+Seattle            450.0000       450.0000        +INF           17.0000      
+Sanfrancisco       450.0000       450.0000        +INF           21.0000      
+
+---- VAR X  Quantity of cars to send from one supplier to one dealer 8 dimensions total
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+Kansas.Newyork               .           400.0000        +INF             .          
+Kansas.Minneapolis           .           150.0000        +INF             .          
+Kansas.Seattle               .              .            +INF            4.0000      
+Kansas.Sanfrancisco          .           450.0000        +INF             .          
+Dallas.Newyork               .              .            +INF            2.0000      
+Dallas.Minneapolis           .           100.0000        +INF             .          
+Dallas.Seattle               .           450.0000        +INF             .          
+Dallas.Sanfrancisco          .              .            +INF            EPS         
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR VCOST             -INF        20650.0000        +INF             .          
+
+  VCOST  total cost ($)
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+
+
+EXECUTION TIME       =        0.046 SECONDS      4 MB  54.4.0 9a60ae27 DAX-DAC
+
+
+USER: Course License                                 G260818+0003Ac-GEN
+      Utah State University                                     DCE5615
+      License for teaching and research at degree granting institutions
+
+
+**** FILE SUMMARY
+
+Input      /Users/bashar/Desktop/GAMS/CEE_6410_Rosenberg/CEE-6410-Rosenberg/HW3_Automobile_Problem.gms
+Output     /Users/bashar/Desktop/GAMS/CEE_6410_Rosenberg/CEE-6410-Rosenberg/HW3_Automobile_Problem.lst

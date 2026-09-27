@@ -1,0 +1,16 @@
+B 3 C o m p i l a t i o n
+B 97 Equation Listing    SOLVE NETWORK Using LP From line 85
+D 100 COST
+D 105 RES_CONSTRAIN1
+D 112 RES_CONSTRAIN2
+B 124 Column Listing      SOLVE NETWORK Using LP From line 85
+E 127 X
+E 149 VCOST
+B 157 Range Statistics    SOLVE NETWORK Using LP From line 85
+B 168 Model Statistics    SOLVE NETWORK Using LP From line 85
+B 181 Solution Report     SOLVE NETWORK Using LP From line 85
+F 214 COST
+F 218 RES_CONSTRAIN1
+F 225 RES_CONSTRAIN2
+G 234 X
+G 249 VCOST
