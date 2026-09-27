@@ -11,8 +11,8 @@ Each supplier has a specified number of cars in stock and each dealership has an
 Inputs:    Suppliers   Dealers
 Cost of each route: Rows are suppliers, Coloumns are dealers.
                 New York            Minneapolis     Seattle     San Francisco
-Kansas          $4                  $12             $18         $18
-Dallas          $9                  $15             $17         $21              
+Kansas          $400                  $1200             $1800         $1800
+Dallas          $900                  $1500             $1700         $2100              
 
 Determine the shipping volumes that will minimze cost.
 
@@ -42,8 +42,8 @@ PARAMETERS
 
 TABLE A(suppliers,dealers) Cost of each supplier to dealer route
                  Minneapolis  Newyork  Sanfrancisco Seattle  
- Kansas          4            12       18           18
- Dallas          9            15       17           21;
+ Kansas          400            1200       1800           1800
+ Dallas          900            1500       1700           2100;
 
 
 * 3. DEFINE the variables
@@ -80,8 +80,8 @@ MODEL NETWORK /COST, RES_CONSTRAIN1,RES_CONSTRAIN2/;
 
 OPTION LIMROW = 10;
 * 6. SOLVE the MODEL
-* Solve the PLANTING model using a Linear Programming Solver (see File=>Options=>Solvers)
-*     to maximize VPROFIT
+* Solve the Network model using a Linear Programming Solver (see File=>Options=>Solvers)
+*     to minimize VCOST
 SOLVE NETWORK USING LP MINIMIZING VCOST;
 
 

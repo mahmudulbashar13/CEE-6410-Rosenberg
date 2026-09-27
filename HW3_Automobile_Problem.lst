@@ -1,4 +1,4 @@
-GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 09/26/26 19:53:22 Page 1
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 09/26/26 20:46:11 Page 1
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
@@ -15,8 +15,8 @@ C o m p i l a t i o n
       Inputs:    Suppliers   Dealers
       Cost of each route: Rows are suppliers, Coloumns are dealers.
                       New York            Minneapolis     Seattle     San Francisco
-      Kansas          $4                  $12             $18         $18
-      Dallas          $9                  $15             $17         $21              
+      Kansas          $400                  $1200             $1800         $1800
+      Dallas          $900                  $1500             $1700         $2100              
        
       Determine the shipping volumes that will minimze cost.
        
@@ -45,8 +45,8 @@ C o m p i l a t i o n
   42   
   43  TABLE A(suppliers,dealers) Cost of each supplier to dealer route
   44                   Minneapolis  Newyork  Sanfrancisco Seattle
-  45   Kansas          4            12       18           18
-  46   Dallas          9            15       17           21;
+  45   Kansas          400            1200       1800           1800
+  46   Dallas          900            1500       1700           2100;
   47   
   48   
   49  * 3. DEFINE the variables
@@ -83,23 +83,23 @@ C o m p i l a t i o n
   80   
   81  OPTION LIMROW = 10;
   82  * 6. SOLVE the MODEL
-  83  * Solve the PLANTING model using a Linear Programming Solver (see File=>Options=>Solvers)
-  84  *     to maximize VPROFIT
+  83  * Solve the Network model using a Linear Programming Solver (see File=>Options=>Solvers)
+  84  *     to minimize VCOST
   85  SOLVE NETWORK USING LP MINIMIZING VCOST;
   86   
   87   
   88  * 6. CLick File menu => RUN (F9) or Solve icon and examine solution report in .LST file
 
 
-COMPILATION TIME     =        0.001 SECONDS      3 MB  54.4.0 9a60ae27 DAX-DAC
-GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 09/26/26 19:53:22 Page 2
+COMPILATION TIME     =        0.000 SECONDS      3 MB  54.4.0 9a60ae27 DAX-DAC
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 09/26/26 20:46:11 Page 2
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Equation Listing    SOLVE NETWORK Using LP From line 85
 
 
 ---- COST  =E=  Total cost ($) and objective function value
 
-COST..  - 4*X(Kansas,Minneapolis) - 12*X(Kansas,Newyork) - 18*X(Kansas,Sanfrancisco) - 18*X(Kansas,Seattle) - 9*X(Dallas,Minneapolis) - 15*X(Dallas,Newyork) - 17*X(Dallas,Sanfrancisco) - 21*X(Dallas,Seattle) + VCOST =E= 0 ; (LHS = 0)
+COST..  - 400*X(Kansas,Minneapolis) - 1200*X(Kansas,Newyork) - 1800*X(Kansas,Sanfrancisco) - 1800*X(Kansas,Seattle) - 900*X(Dallas,Minneapolis) - 1500*X(Dallas,Newyork) - 1700*X(Dallas,Sanfrancisco) - 2100*X(Dallas,Seattle) + VCOST =E= 0 ; (LHS = 0)
      
 
 ---- RES_CONSTRAIN1  =L=  constraint of how many cars are in stock for each supplier
@@ -119,7 +119,7 @@ RES_CONSTRAIN2(Sanfrancisco)..  X(Kansas,Sanfrancisco) + X(Dallas,Sanfrancisco) 
      
 RES_CONSTRAIN2(Seattle)..  X(Kansas,Seattle) + X(Dallas,Seattle) =G= 450 ; (LHS = 0, INFES = 450 ****)
      
-GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 09/26/26 19:53:22 Page 3
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 09/26/26 20:46:11 Page 3
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Column Listing      SOLVE NETWORK Using LP From line 85
 
@@ -128,19 +128,19 @@ Column Listing      SOLVE NETWORK Using LP From line 85
 
 X(Kansas,Minneapolis)
                 (.LO, .L, .UP, .M = 0, 0, +INF, 0)
-       -4       COST
+     -400       COST
         1       RES_CONSTRAIN1(Kansas)
         1       RES_CONSTRAIN2(Minneapolis)
 
 X(Kansas,Newyork)
                 (.LO, .L, .UP, .M = 0, 0, +INF, 0)
-      -12       COST
+    -1200       COST
         1       RES_CONSTRAIN1(Kansas)
         1       RES_CONSTRAIN2(Newyork)
 
 X(Kansas,Sanfrancisco)
                 (.LO, .L, .UP, .M = 0, 0, +INF, 0)
-      -18       COST
+    -1800       COST
         1       RES_CONSTRAIN1(Kansas)
         1       RES_CONSTRAIN2(Sanfrancisco)
 
@@ -152,7 +152,7 @@ VCOST
                 (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
         1       COST
 
-GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 09/26/26 19:53:22 Page 4
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 09/26/26 20:46:11 Page 4
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Range Statistics    SOLVE NETWORK Using LP From line 85
 
@@ -161,9 +161,9 @@ RANGE STATISTICS (ABSOLUTE NON-ZERO FINITE VALUES)
 
 RHS       [min, max] : [ 2.500E+02, 1.000E+03] - Zero values observed as well
 Bound     [min, max] : [        NA,        NA] - Zero values observed as well
-Matrix    [min, max] : [ 1.000E+00, 2.100E+01]
+Matrix    [min, max] : [ 1.000E+00, 2.100E+03]
 
-GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 09/26/26 19:53:22 Page 5
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 09/26/26 20:46:11 Page 5
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Model Statistics    SOLVE NETWORK Using LP From line 85
 
@@ -175,8 +175,8 @@ BLOCKS OF VARIABLES           2     SINGLE VARIABLES            9
 NON ZERO ELEMENTS            25
 
 
-GENERATION TIME      =        0.007 SECONDS      4 MB  54.4.0 9a60ae27 DAX-DAC
-GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 09/26/26 19:53:22 Page 6
+GENERATION TIME      =        0.005 SECONDS      4 MB  54.4.0 9a60ae27 DAX-DAC
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 09/26/26 20:46:11 Page 6
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Solution Report     SOLVE NETWORK Using LP From line 85
 
@@ -189,9 +189,9 @@ Solution Report     SOLVE NETWORK Using LP From line 85
 
 **** SOLVER STATUS     1 Normal Completion
 **** MODEL STATUS      1 Optimal
-**** OBJECTIVE VALUE            20650.0000
+**** OBJECTIVE VALUE          2065000.0000
 
- RESOURCE USAGE, LIMIT          0.007 10000000000.000
+ RESOURCE USAGE, LIMIT          0.003 10000000000.000
  ITERATION COUNT, LIMIT         5    2147483647
 *** This solver runs with a community license.
 --- GMO setup time: 0.00s
@@ -202,11 +202,11 @@ Solution Report     SOLVE NETWORK Using LP From line 85
 
 
 --- LP status (1): optimal.
---- Cplex Time: 0.01sec (det. 0.01 ticks)
+--- Cplex Time: 0.00sec (det. 0.01 ticks)
 
 
 Optimal solution found
-Objective:        20650.000000
+Objective:      2065000.000000
 
 
                            LOWER          LEVEL          UPPER         MARGINAL
@@ -219,17 +219,17 @@ Objective:        20650.000000
 
               LOWER          LEVEL          UPPER         MARGINAL
 
-Kansas        -INF         1000.0000      1000.0000        -3.0000      
+Kansas        -INF         1000.0000      1000.0000      -300.0000      
 Dallas        -INF          550.0000       800.0000          .          
 
 ---- EQU RES_CONSTRAIN2  constraint of minimum number of cars sold by each dealer
 
                     LOWER          LEVEL          UPPER         MARGINAL
 
-Minneapolis        400.0000       400.0000        +INF            7.0000      
-Newyork            250.0000       250.0000        +INF           15.0000      
-Sanfrancisco       450.0000       450.0000        +INF           17.0000      
-Seattle            450.0000       450.0000        +INF           21.0000      
+Minneapolis        400.0000       400.0000        +INF          700.0000      
+Newyork            250.0000       250.0000        +INF         1500.0000      
+Sanfrancisco       450.0000       450.0000        +INF         1700.0000      
+Seattle            450.0000       450.0000        +INF         2100.0000      
 
 ---- VAR X  Quantity of cars to send from one supplier to one dealer 8 dimensions total
 
@@ -237,16 +237,16 @@ Seattle            450.0000       450.0000        +INF           21.0000
 
 Kansas.Minneapolis           .           400.0000        +INF             .          
 Kansas.Newyork               .           150.0000        +INF             .          
-Kansas.Sanfrancisco          .              .            +INF            4.0000      
+Kansas.Sanfrancisco          .              .            +INF          400.0000      
 Kansas.Seattle               .           450.0000        +INF             .          
-Dallas.Minneapolis           .              .            +INF            2.0000      
+Dallas.Minneapolis           .              .            +INF          200.0000      
 Dallas.Newyork               .           100.0000        +INF             .          
 Dallas.Sanfrancisco          .           450.0000        +INF             .          
 Dallas.Seattle               .              .            +INF            EPS         
 
                            LOWER          LEVEL          UPPER         MARGINAL
 
----- VAR VCOST             -INF        20650.0000        +INF             .          
+---- VAR VCOST             -INF      2065000.0000        +INF             .          
 
   VCOST  total cost ($)
 
@@ -256,7 +256,7 @@ Dallas.Seattle               .              .            +INF            EPS
                              0  UNBOUNDED
 
 
-EXECUTION TIME       =        0.068 SECONDS      4 MB  54.4.0 9a60ae27 DAX-DAC
+EXECUTION TIME       =        0.041 SECONDS      4 MB  54.4.0 9a60ae27 DAX-DAC
 
 
 USER: Course License                                 G260818+0003Ac-GEN
