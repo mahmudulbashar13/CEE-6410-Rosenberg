@@ -26,7 +26,7 @@ $offtext
 
 * 1. DEFINE the SETS
 SETS suppliers  cars in stock /Kansas, Dallas/
-     dealers expected sales /Newyork, Minneapolis, Seattle, Sanfrancisco/;
+     dealers expected sales /Minneapolis, Newyork, Sanfrancisco, Seattle /;
 
 * 2. DEFINE input data
 PARAMETERS
@@ -35,15 +35,15 @@ PARAMETERS
           Dallas 800 /
 
    b(dealers) Expected sales in quantity of cars
-          /Newyork 400,
-           Minneapolis  250,
-           Seattle  450,
-           Sanfrancisco 450/;
+          /Minneapolis 400,
+           Newyork  250
+           Sanfrancisco 450,
+           Seattle  450/;
 
 TABLE A(suppliers,dealers) Cost of each supplier to dealer route
-                 Newyork  Minneapolis  Seattle  Sanfrancisco
- Kansas          4        12           18       18
- Dallas          9        15           17       21;
+                 Minneapolis  Newyork  Sanfrancisco Seattle  
+ Kansas          4            12       18           18
+ Dallas          9            15       17           21;
 
 
 * 3. DEFINE the variables
