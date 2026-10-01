@@ -1,0 +1,386 @@
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/01/26 15:58:50 Page 1
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+      Hay Grain Problem
+   4   
+   5  * 1. DEFINE the SETS
+   6  SETS crop crops growing /Hay, Grain/
+   7       res resources /June, July, August, Totalcars/;
+   8   
+   9  * 2. DEFINE input data
+  10  PARAMETERS
+  11     c(crop) Objective function coefficients ($ per plant)
+  12           /Hay 100,
+  13           Grain 120/
+  14     b(res) Right hand constraint values (per resource)
+  15            /June 14000,
+  16             July  18000,
+  17             August 6000,
+  18             Totalcars 10000/;
+  19   
+  20  TABLE A(crop,res) Left hand side constraint coefficients
+  21                   June    July  August Totalcars
+  22   Hay             2       1     1      1
+  23   Grain           1       2     0      1;
+  24   
+  25  * 3. DEFINE the variables
+  26  VARIABLES X(crop) plants planted (Number)
+  27            VPROFIT  total profit ($)
+  28            Y(res)  value of resources used (units specific to variable)
+  29            VREDCOST total reduced cost ($);
+  30   
+  31  * Non-negativity constraints
+  32  POSITIVE VARIABLES X,Y;
+  33   
+  34  * 4. COMBINE variables and data in equations
+  35  EQUATIONS
+  36     PROFIT_PRIMAL Total profit ($) and objective function value
+  37     RES_CONS_PRIMAL(res) Resource constraints
+  38     REDCOST_DUAL Reduced Cost ($) associated with using resources
+  39     RES_CONS_DUAL(crop) Profit levels ;
+  40   
+  41  *Primal Equations
+  42  PROFIT_PRIMAL..                 VPROFIT =E= SUM(crop,c(crop)*X(crop));
+  43  RES_CONS_PRIMAL(res) ..    SUM(crop,A(crop,res)*X(crop)) =L= b(res);
+  44   
+  45   
+  46  *Dual Equations
+  47  REDCOST_DUAL..                 VREDCOST =E= SUM(res,b(res)*Y(res));
+  48  RES_CONS_DUAL(crop)..          sum(res,A(crop,res)*Y(res)) =G= c(crop);
+  49   
+  50  X.LO(crop) = 5;
+  51   
+  52  * 5. DEFINE the MODELS
+  53  *PRIMAL model
+  54  MODEL PLANT_PRIMAL /PROFIT_PRIMAL, RES_CONS_PRIMAL/;
+  55  *Set the options file to print out range of basis information
+  56  PLANT_PRIMAL.optfile = 1;
+  57   
+  58  *DUAL model
+  59  MODEL PLANT_DUAL /REDCOST_DUAL, RES_CONS_DUAL/;
+  60   
+  61  * 6. SOLVE the MODELS
+  62  * Solve the PLANTING PRIMAL model using a Linear Programming Solver (see File=>Options=>Solvers)
+  63  *     to maximize VPROFIT
+  64  SOLVE PLANT_PRIMAL USING LP MAXIMIZING VPROFIT;
+  65   
+  66  * Solve the PLANTING DUAL model using a Linear Programming Solver (see File=>Options=>Solvers)
+  67  *     to maximize VPROFIT
+  68  SOLVE PLANT_DUAL USING LP MINIMIZING VREDCOST;
+  69  *Order does not matter!
+  70   
+  71  * 6. CLick File menu => RUN (F9) or Solve icon and examine solution report in .LST file
+  72   
+  73  * 7 . Dump all data and results to GAMS proprietary file storage .gdx and to Excel
+  74  Execute_Unload "ExHW2Dual.gdx";
+  75  * Dump the gdx file to an Excel workbook
+  76  Execute "gdx2xls ExHW2Dual.gdx"
+  77  * To open the GDX file in the GAMS IDE, select File => Open.
+  78  * In the Open window, set Filetype to .gdx and select the file.
+
+
+COMPILATION TIME     =        0.000 SECONDS      3 MB  54.4.0 9a60ae27 DAX-DAC
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/01/26 15:58:50 Page 2
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Equation Listing    SOLVE PLANT_PRIMAL Using LP From line 64
+
+
+---- PROFIT_PRIMAL  =E=  Total profit ($) and objective function value
+
+PROFIT_PRIMAL..  - 100*X(Hay) - 120*X(Grain) + VPROFIT =E= 0 ; (LHS = -1100, INFES = 1100 ****)
+     
+
+---- RES_CONS_PRIMAL  =L=  Resource constraints
+
+RES_CONS_PRIMAL(June)..  2*X(Hay) + X(Grain) =L= 14000 ; (LHS = 15)
+     
+RES_CONS_PRIMAL(July)..  X(Hay) + 2*X(Grain) =L= 18000 ; (LHS = 15)
+     
+RES_CONS_PRIMAL(August)..  X(Hay) =L= 6000 ; (LHS = 5)
+     
+REMAINING ENTRY SKIPPED
+
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/01/26 15:58:50 Page 3
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Column Listing      SOLVE PLANT_PRIMAL Using LP From line 64
+
+
+---- X  plants planted (Number)
+
+X(Hay)
+                (.LO, .L, .UP, .M = 5, 5, +INF, 0)
+     -100       PROFIT_PRIMAL
+        2       RES_CONS_PRIMAL(June)
+        1       RES_CONS_PRIMAL(July)
+        1       RES_CONS_PRIMAL(August)
+        1       RES_CONS_PRIMAL(Totalcars)
+        0       (OLD LEVEL ****)
+
+X(Grain)
+                (.LO, .L, .UP, .M = 5, 5, +INF, 0)
+     -120       PROFIT_PRIMAL
+        1       RES_CONS_PRIMAL(June)
+        2       RES_CONS_PRIMAL(July)
+        1       RES_CONS_PRIMAL(Totalcars)
+        0       (OLD LEVEL ****)
+
+
+---- VPROFIT  total profit ($)
+
+VPROFIT
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       PROFIT_PRIMAL
+
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/01/26 15:58:50 Page 4
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Range Statistics    SOLVE PLANT_PRIMAL Using LP From line 64
+
+
+RANGE STATISTICS (ABSOLUTE NON-ZERO FINITE VALUES)
+
+RHS       [min, max] : [ 6.000E+03, 1.800E+04] - Zero values observed as well
+Bound     [min, max] : [ 5.000E+00, 5.000E+00]
+Matrix    [min, max] : [ 1.000E+00, 1.200E+02]
+
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/01/26 15:58:50 Page 5
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Model Statistics    SOLVE PLANT_PRIMAL Using LP From line 64
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           2     SINGLE EQUATIONS            5
+BLOCKS OF VARIABLES           2     SINGLE VARIABLES            3  2 projected
+NON ZERO ELEMENTS            10
+
+
+GENERATION TIME      =        0.006 SECONDS      4 MB  54.4.0 9a60ae27 DAX-DAC
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/01/26 15:58:50 Page 6
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Solution Report     SOLVE PLANT_PRIMAL Using LP From line 64
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   PLANT_PRIMAL        OBJECTIVE  VPROFIT
+     TYPE    LP                  DIRECTION  MAXIMIZE
+     SOLVER  CPLEX               FROM LINE  64
+
+**** SOLVER STATUS     1 Normal Completion
+**** MODEL STATUS      1 Optimal
+**** OBJECTIVE VALUE          1160000.0000
+
+ RESOURCE USAGE, LIMIT          0.004 10000000000.000
+ ITERATION COUNT, LIMIT         3    2147483647
+*** This solver runs with a community license.
+
+--- Reading option file '/Users/bashar/Desktop/GAMS/CEE_6410_Rosenberg/CEE-6410-Rosenberg/cplex.opt' failed: Cannot open file.
+
+--- GMO setup time: 0.00s
+--- GMO memory 0.50 Mb (peak 0.50 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 22.1.2.0 link memory 0.00 Mb (peak 0.00 Mb)
+--- Starting Cplex
+
+
+--- LP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.01 ticks)
+
+
+Optimal solution found
+Objective:      1160000.000000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU PROFIT_PR~          .              .              .             1.0000      
+
+  PROFIT_PRIMAL  Total profit ($) and objective function value
+
+---- EQU RES_CONS_PRIMAL  Resource constraints
+
+                 LOWER          LEVEL          UPPER         MARGINAL
+
+June             -INF        12000.0000     14000.0000          .          
+July             -INF        18000.0000     18000.0000        20.0000      
+August           -INF         2000.0000      6000.0000          .          
+Totalcars        -INF        10000.0000     10000.0000        80.0000      
+
+---- VAR X  plants planted (Number)
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+Hay           5.0000      2000.0000        +INF             .          
+Grain         5.0000      8000.0000        +INF             .          
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR VPROFIT           -INF      1160000.0000        +INF             .          
+
+  VPROFIT  total profit ($)
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/01/26 15:58:50 Page 7
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Equation Listing    SOLVE PLANT_DUAL Using LP From line 68
+
+
+---- REDCOST_DUAL  =E=  Reduced Cost ($) associated with using resources
+
+REDCOST_DUAL..  - 14000*Y(June) - 18000*Y(July) - 6000*Y(August) - 10000*Y(Totalcars) + VREDCOST =E= 0 ; (LHS = 0)
+     
+
+---- RES_CONS_DUAL  =G=  Profit levels
+
+RES_CONS_DUAL(Hay)..  2*Y(June) + Y(July) + Y(August) + Y(Totalcars) =G= 100 ; (LHS = 0, INFES = 100 ****)
+     
+RES_CONS_DUAL(Grain)..  Y(June) + 2*Y(July) + Y(Totalcars) =G= 120 ; (LHS = 0, INFES = 120 ****)
+     
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/01/26 15:58:50 Page 8
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Column Listing      SOLVE PLANT_DUAL Using LP From line 68
+
+
+---- Y  value of resources used (units specific to variable)
+
+Y(June)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+   -14000       REDCOST_DUAL
+        2       RES_CONS_DUAL(Hay)
+        1       RES_CONS_DUAL(Grain)
+
+Y(July)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+   -18000       REDCOST_DUAL
+        1       RES_CONS_DUAL(Hay)
+        2       RES_CONS_DUAL(Grain)
+
+Y(August)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+    -6000       REDCOST_DUAL
+        1       RES_CONS_DUAL(Hay)
+
+REMAINING ENTRY SKIPPED
+
+---- VREDCOST  total reduced cost ($)
+
+VREDCOST
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       REDCOST_DUAL
+
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/01/26 15:58:50 Page 9
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Range Statistics    SOLVE PLANT_DUAL Using LP From line 68
+
+
+RANGE STATISTICS (ABSOLUTE NON-ZERO FINITE VALUES)
+
+RHS       [min, max] : [ 1.000E+02, 1.200E+02] - Zero values observed as well
+Bound     [min, max] : [        NA,        NA] - Zero values observed as well
+Matrix    [min, max] : [ 1.000E+00, 1.800E+04]
+
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/01/26 15:58:50 Page 10
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Model Statistics    SOLVE PLANT_DUAL Using LP From line 68
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           2     SINGLE EQUATIONS            3
+BLOCKS OF VARIABLES           2     SINGLE VARIABLES            5
+NON ZERO ELEMENTS            12
+
+
+GENERATION TIME      =        0.001 SECONDS      4 MB  54.4.0 9a60ae27 DAX-DAC
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/01/26 15:58:50 Page 11
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Solution Report     SOLVE PLANT_DUAL Using LP From line 68
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   PLANT_DUAL          OBJECTIVE  VREDCOST
+     TYPE    LP                  DIRECTION  MINIMIZE
+     SOLVER  CPLEX               FROM LINE  68
+
+**** SOLVER STATUS     1 Normal Completion
+**** MODEL STATUS      1 Optimal
+**** OBJECTIVE VALUE          1160000.0000
+
+ RESOURCE USAGE, LIMIT          0.000 10000000000.000
+ ITERATION COUNT, LIMIT         2    2147483647
+*** This solver runs with a community license.
+--- GMO setup time: 0.00s
+--- GMO memory 0.50 Mb (peak 0.50 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 22.1.2.0 link memory 0.00 Mb (peak 0.00 Mb)
+--- Starting Cplex
+
+
+--- LP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.00 ticks)
+
+
+Optimal solution found
+Objective:      1160000.000000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU REDCOST_D~          .              .              .             1.0000      
+
+  REDCOST_DUAL  Reduced Cost ($) associated with using resources
+
+---- EQU RES_CONS_DUAL  Profit levels
+
+             LOWER          LEVEL          UPPER         MARGINAL
+
+Hay         100.0000       100.0000        +INF         2000.0000      
+Grain       120.0000       120.0000        +INF         8000.0000      
+
+---- VAR Y  value of resources used (units specific to variable)
+
+                 LOWER          LEVEL          UPPER         MARGINAL
+
+June               .              .            +INF         2000.0000      
+July               .            20.0000        +INF             .          
+August             .              .            +INF         4000.0000      
+Totalcars          .            80.0000        +INF             .          
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR VREDCOST          -INF      1160000.0000        +INF             .          
+
+  VREDCOST  total reduced cost ($)
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/01/26 15:58:50 Page 12
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+E x e c u t i o n
+
+
+**** Exec Error at line 76: Execute has nonzero return code RC=127
+
+
+EXECUTION TIME       =        0.069 SECONDS      4 MB  54.4.0 9a60ae27 DAX-DAC
+
+
+USER: Course License                                 G260818+0003Ac-GEN
+      Utah State University                                     DCE5615
+      License for teaching and research at degree granting institutions
+
+
+**** FILE SUMMARY
+
+Input      /Users/bashar/Desktop/GAMS/CEE_6410_Rosenberg/CEE-6410-Rosenberg/HW2_Dual copy.gms
+Output     /Users/bashar/Desktop/GAMS/CEE_6410_Rosenberg/CEE-6410-Rosenberg/HW2_Dual copy.lst
+
+**** USER ERROR(S) ENCOUNTERED
