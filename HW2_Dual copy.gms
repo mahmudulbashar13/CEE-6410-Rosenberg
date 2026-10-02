@@ -4,7 +4,7 @@ $offtext
 
 * 1. DEFINE the SETS
 SETS crop crops growing /Hay, Grain/
-     res resources /June, July, August, Totalcars/;
+     res resources /June, July, August, Land/;
 
 * 2. DEFINE input data
 PARAMETERS
@@ -15,10 +15,10 @@ PARAMETERS
           /June 14000,
            July  18000,
            August 6000,
-           Totalcars 10000/;
+           Land 10000/;
 
 TABLE A(crop,res) Left hand side constraint coefficients
-                 June    July  August Totalcars
+                 June    July  August Land
  Hay             2       1     1      1   
  Grain           1       2     0      1;
 

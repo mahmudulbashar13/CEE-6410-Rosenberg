@@ -1,4 +1,4 @@
-GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/01/26 15:58:50 Page 1
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/02/26 17:12:33 Page 1
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
@@ -7,7 +7,7 @@ C o m p i l a t i o n
    4   
    5  * 1. DEFINE the SETS
    6  SETS crop crops growing /Hay, Grain/
-   7       res resources /June, July, August, Totalcars/;
+   7       res resources /June, July, August, Land/;
    8   
    9  * 2. DEFINE input data
   10  PARAMETERS
@@ -18,10 +18,10 @@ C o m p i l a t i o n
   15            /June 14000,
   16             July  18000,
   17             August 6000,
-  18             Totalcars 10000/;
+  18             Land 10000/;
   19   
   20  TABLE A(crop,res) Left hand side constraint coefficients
-  21                   June    July  August Totalcars
+  21                   June    July  August Land
   22   Hay             2       1     1      1
   23   Grain           1       2     0      1;
   24   
@@ -81,8 +81,8 @@ C o m p i l a t i o n
   78  * In the Open window, set Filetype to .gdx and select the file.
 
 
-COMPILATION TIME     =        0.000 SECONDS      3 MB  54.4.0 9a60ae27 DAX-DAC
-GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/01/26 15:58:50 Page 2
+COMPILATION TIME     =        0.001 SECONDS      3 MB  54.4.0 9a60ae27 DAX-DAC
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/02/26 17:12:33 Page 2
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Equation Listing    SOLVE PLANT_PRIMAL Using LP From line 64
 
@@ -102,7 +102,7 @@ RES_CONS_PRIMAL(August)..  X(Hay) =L= 6000 ; (LHS = 5)
      
 REMAINING ENTRY SKIPPED
 
-GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/01/26 15:58:50 Page 3
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/02/26 17:12:33 Page 3
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Column Listing      SOLVE PLANT_PRIMAL Using LP From line 64
 
@@ -115,7 +115,7 @@ X(Hay)
         2       RES_CONS_PRIMAL(June)
         1       RES_CONS_PRIMAL(July)
         1       RES_CONS_PRIMAL(August)
-        1       RES_CONS_PRIMAL(Totalcars)
+        1       RES_CONS_PRIMAL(Land)
         0       (OLD LEVEL ****)
 
 X(Grain)
@@ -123,7 +123,7 @@ X(Grain)
      -120       PROFIT_PRIMAL
         1       RES_CONS_PRIMAL(June)
         2       RES_CONS_PRIMAL(July)
-        1       RES_CONS_PRIMAL(Totalcars)
+        1       RES_CONS_PRIMAL(Land)
         0       (OLD LEVEL ****)
 
 
@@ -133,7 +133,7 @@ VPROFIT
                 (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
         1       PROFIT_PRIMAL
 
-GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/01/26 15:58:50 Page 4
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/02/26 17:12:33 Page 4
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Range Statistics    SOLVE PLANT_PRIMAL Using LP From line 64
 
@@ -144,7 +144,7 @@ RHS       [min, max] : [ 6.000E+03, 1.800E+04] - Zero values observed as well
 Bound     [min, max] : [ 5.000E+00, 5.000E+00]
 Matrix    [min, max] : [ 1.000E+00, 1.200E+02]
 
-GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/01/26 15:58:50 Page 5
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/02/26 17:12:33 Page 5
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Model Statistics    SOLVE PLANT_PRIMAL Using LP From line 64
 
@@ -157,7 +157,7 @@ NON ZERO ELEMENTS            10
 
 
 GENERATION TIME      =        0.006 SECONDS      4 MB  54.4.0 9a60ae27 DAX-DAC
-GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/01/26 15:58:50 Page 6
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/02/26 17:12:33 Page 6
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Solution Report     SOLVE PLANT_PRIMAL Using LP From line 64
 
@@ -172,7 +172,7 @@ Solution Report     SOLVE PLANT_PRIMAL Using LP From line 64
 **** MODEL STATUS      1 Optimal
 **** OBJECTIVE VALUE          1160000.0000
 
- RESOURCE USAGE, LIMIT          0.004 10000000000.000
+ RESOURCE USAGE, LIMIT          0.008 10000000000.000
  ITERATION COUNT, LIMIT         3    2147483647
 *** This solver runs with a community license.
 
@@ -186,7 +186,7 @@ Solution Report     SOLVE PLANT_PRIMAL Using LP From line 64
 
 
 --- LP status (1): optimal.
---- Cplex Time: 0.00sec (det. 0.01 ticks)
+--- Cplex Time: 0.01sec (det. 0.01 ticks)
 
 
 Optimal solution found
@@ -201,12 +201,12 @@ Objective:      1160000.000000
 
 ---- EQU RES_CONS_PRIMAL  Resource constraints
 
-                 LOWER          LEVEL          UPPER         MARGINAL
+              LOWER          LEVEL          UPPER         MARGINAL
 
-June             -INF        12000.0000     14000.0000          .          
-July             -INF        18000.0000     18000.0000        20.0000      
-August           -INF         2000.0000      6000.0000          .          
-Totalcars        -INF        10000.0000     10000.0000        80.0000      
+June          -INF        12000.0000     14000.0000          .          
+July          -INF        18000.0000     18000.0000        20.0000      
+August        -INF         2000.0000      6000.0000          .          
+Land          -INF        10000.0000     10000.0000        80.0000      
 
 ---- VAR X  plants planted (Number)
 
@@ -225,23 +225,23 @@ Grain         5.0000      8000.0000        +INF             .
 **** REPORT SUMMARY :        0     NONOPT
                              0 INFEASIBLE
                              0  UNBOUNDED
-GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/01/26 15:58:50 Page 7
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/02/26 17:12:33 Page 7
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Equation Listing    SOLVE PLANT_DUAL Using LP From line 68
 
 
 ---- REDCOST_DUAL  =E=  Reduced Cost ($) associated with using resources
 
-REDCOST_DUAL..  - 14000*Y(June) - 18000*Y(July) - 6000*Y(August) - 10000*Y(Totalcars) + VREDCOST =E= 0 ; (LHS = 0)
+REDCOST_DUAL..  - 14000*Y(June) - 18000*Y(July) - 6000*Y(August) - 10000*Y(Land) + VREDCOST =E= 0 ; (LHS = 0)
      
 
 ---- RES_CONS_DUAL  =G=  Profit levels
 
-RES_CONS_DUAL(Hay)..  2*Y(June) + Y(July) + Y(August) + Y(Totalcars) =G= 100 ; (LHS = 0, INFES = 100 ****)
+RES_CONS_DUAL(Hay)..  2*Y(June) + Y(July) + Y(August) + Y(Land) =G= 100 ; (LHS = 0, INFES = 100 ****)
      
-RES_CONS_DUAL(Grain)..  Y(June) + 2*Y(July) + Y(Totalcars) =G= 120 ; (LHS = 0, INFES = 120 ****)
+RES_CONS_DUAL(Grain)..  Y(June) + 2*Y(July) + Y(Land) =G= 120 ; (LHS = 0, INFES = 120 ****)
      
-GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/01/26 15:58:50 Page 8
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/02/26 17:12:33 Page 8
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Column Listing      SOLVE PLANT_DUAL Using LP From line 68
 
@@ -273,7 +273,7 @@ VREDCOST
                 (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
         1       REDCOST_DUAL
 
-GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/01/26 15:58:50 Page 9
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/02/26 17:12:33 Page 9
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Range Statistics    SOLVE PLANT_DUAL Using LP From line 68
 
@@ -284,7 +284,7 @@ RHS       [min, max] : [ 1.000E+02, 1.200E+02] - Zero values observed as well
 Bound     [min, max] : [        NA,        NA] - Zero values observed as well
 Matrix    [min, max] : [ 1.000E+00, 1.800E+04]
 
-GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/01/26 15:58:50 Page 10
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/02/26 17:12:33 Page 10
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Model Statistics    SOLVE PLANT_DUAL Using LP From line 68
 
@@ -297,7 +297,7 @@ NON ZERO ELEMENTS            12
 
 
 GENERATION TIME      =        0.001 SECONDS      4 MB  54.4.0 9a60ae27 DAX-DAC
-GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/01/26 15:58:50 Page 11
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/02/26 17:12:33 Page 11
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 Solution Report     SOLVE PLANT_DUAL Using LP From line 68
 
@@ -345,12 +345,12 @@ Grain       120.0000       120.0000        +INF         8000.0000
 
 ---- VAR Y  value of resources used (units specific to variable)
 
-                 LOWER          LEVEL          UPPER         MARGINAL
+              LOWER          LEVEL          UPPER         MARGINAL
 
-June               .              .            +INF         2000.0000      
-July               .            20.0000        +INF             .          
-August             .              .            +INF         4000.0000      
-Totalcars          .            80.0000        +INF             .          
+June            .              .            +INF         2000.0000      
+July            .            20.0000        +INF             .          
+August          .              .            +INF         4000.0000      
+Land            .            80.0000        +INF             .          
 
                            LOWER          LEVEL          UPPER         MARGINAL
 
@@ -362,7 +362,7 @@ Totalcars          .            80.0000        +INF             .
 **** REPORT SUMMARY :        0     NONOPT
                              0 INFEASIBLE
                              0  UNBOUNDED
-GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/01/26 15:58:50 Page 12
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/02/26 17:12:33 Page 12
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 E x e c u t i o n
 
@@ -370,7 +370,7 @@ E x e c u t i o n
 **** Exec Error at line 76: Execute has nonzero return code RC=127
 
 
-EXECUTION TIME       =        0.069 SECONDS      4 MB  54.4.0 9a60ae27 DAX-DAC
+EXECUTION TIME       =        0.114 SECONDS      4 MB  54.4.0 9a60ae27 DAX-DAC
 
 
 USER: Course License                                 G260818+0003Ac-GEN
