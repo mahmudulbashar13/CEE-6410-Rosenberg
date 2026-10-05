@@ -1,0 +1,396 @@
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/03/26 22:06:51 Page 1
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+      Reservoir Problem
+      September 15, 2015
+   5   
+   6  * 1. DEFINE the SETS
+   7  SETS time  month /1, 2, 3, 4, 5, 6/
+   8       spatial water flow /turbine,irrigation,reservoir,spill,A/;
+   9   
+  10   
+  11  * 2. DEFINE input data
+  12  PARAMETERS
+  13   
+  14   
+  15     inflow(time) Inflow
+  16           /1 2,
+  17            2 2,
+  18            3 3,
+  19            4 4,
+  20            5 3,
+  21            6 2/;
+  22   
+  23  SCALARS
+  24      reservoirmax     reservoir capcaity          /9/
+  25      reservoirinit    reservoir initial storage  /5/
+  26      turbinemax    Turbine capacity             /4/
+  27      Amin     Minimum flow at A                /1/ ;
+  28   
+  29  TABLE A(time,spatial) Benifits
+  30             turbine  irrigation  reservoir   spill   A
+  31   1         1.6      1.0         0           0       0
+  32   2         1.7      1.2         0           0       0
+  33   3         1.8      1.9         0           0       0
+  34   4         1.9      2.0         0           0       0
+  35   5         2.0      2.2         0           0       0
+  36   6         2.0      2.2         0           0       0;
+  37   
+  38  * 3. DEFINE the variables
+  39  VARIABLES
+  40      X(time,spatial) Quantity of water flow each month to each location,
+  41      VCOST  total benifits ($);
+  42   
+  43   
+  44   
+  45  * Non-negativity constraints
+  46  POSITIVE VARIABLES X(time,spatial);
+  47   
+  48  * 4. COMBINE variables and data in equations
+  49  EQUATIONS
+  50      COST Total cost ($) and objective function value
+  51      resemassbalance(time)     Reservoir storage mass balance
+  52      spill(time)       water flow to spill
+  53      Aminimum(time)    minimum flow to A
+  54      resendstorage           Ending storage >= beginning storage
+  55      turbinecap(time)     turbine capacity
+  56      resmax(time)      reservoir capacity limit ;
+  57   
+  58  COST..                 VCOST =E= SUM((time,spatial), A(time,spatial)*X(time,spatial));
+  59  resemassbalance(time)..   X(time,'reservoir') - reservoirinit$(ord(time) eq 1)
+  60                            - X(time-1,'reservoir')$(ord(time) gt 1)
+  61                            =E= inflow(time) - X(time,'turbine') - X(time,'spill');
+  62  spill(time)..             X(time,'turbine') + X(time,'spill')
+  63                            =E= X(time,'irrigation') + X(time,'A');
+  64   
+  65  Aminimum(time)..          X(time,'A') =G= Amin;
+  66   
+  67  resendstorage..           X('6','reservoir') =G= reservoirinit;
+  68   
+  69  turbinecap(time)..        X(time,'turbine') =L= turbinemax;
+  70   
+  71  resmax(time)..            X(time,'reservoir') =L= reservoirmax;
+  72   
+  73  * 5. DEFINE the MODEL from the EQUATIONS
+  74  MODEL Reservoir /ALL/;
+  75  *Altnerative way to write (include all previously defined equations)
+  76  *MODEL PLANTING /ALL/;
+  77   
+  78  OPTION LIMROW = 10;
+  79  * 6. SOLVE the MODEL
+  80  * Solve the Network model using a Linear Programming Solver (see File=>Options=>Solvers)
+  81  *     to minimize VCOST
+  82  SOLVE Reservoir USING LP MAXIMIZING VCOST;
+  83   
+  84   
+  85  * 6. CLick File menu => RUN (F9) or Solve icon and examine solution report in .LST file
+
+
+COMPILATION TIME     =        0.000 SECONDS      3 MB  54.4.0 9a60ae27 DAX-DAC
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/03/26 22:06:51 Page 2
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Equation Listing    SOLVE Reservoir Using LP From line 82
+
+
+---- COST  =E=  Total cost ($) and objective function value
+
+COST..  - 1.6*X(1,turbine) - X(1,irrigation) - 1.7*X(2,turbine) - 1.2*X(2,irrigation) - 1.8*X(3,turbine) - 1.9*X(3,irrigation) - 1.9*X(4,turbine) - 2*X(4,irrigation) - 2*X(5,turbine) - 2.2*X(5,irrigation) - 2*X(6,turbine) - 2.2*X(6,irrigation) + VCOST =E= 0 ; (LHS = 0)
+     
+
+---- resemassbalance  =E=  Reservoir storage mass balance
+
+resemassbalance(1)..  X(1,turbine) + X(1,reservoir) + X(1,spill) =E= 7 ; (LHS = 0, INFES = 7 ****)
+     
+resemassbalance(2)..  - X(1,reservoir) + X(2,turbine) + X(2,reservoir) + X(2,spill) =E= 2 ; (LHS = 0, INFES = 2 ****)
+     
+resemassbalance(3)..  - X(2,reservoir) + X(3,turbine) + X(3,reservoir) + X(3,spill) =E= 3 ; (LHS = 0, INFES = 3 ****)
+     
+resemassbalance(4)..  - X(3,reservoir) + X(4,turbine) + X(4,reservoir) + X(4,spill) =E= 4 ; (LHS = 0, INFES = 4 ****)
+     
+resemassbalance(5)..  - X(4,reservoir) + X(5,turbine) + X(5,reservoir) + X(5,spill) =E= 3 ; (LHS = 0, INFES = 3 ****)
+     
+resemassbalance(6)..  - X(5,reservoir) + X(6,turbine) + X(6,reservoir) + X(6,spill) =E= 2 ; (LHS = 0, INFES = 2 ****)
+     
+
+---- spill  =E=  water flow to spill
+
+spill(1)..  X(1,turbine) - X(1,irrigation) + X(1,spill) - X(1,A) =E= 0 ; (LHS = 0)
+     
+spill(2)..  X(2,turbine) - X(2,irrigation) + X(2,spill) - X(2,A) =E= 0 ; (LHS = 0)
+     
+spill(3)..  X(3,turbine) - X(3,irrigation) + X(3,spill) - X(3,A) =E= 0 ; (LHS = 0)
+     
+spill(4)..  X(4,turbine) - X(4,irrigation) + X(4,spill) - X(4,A) =E= 0 ; (LHS = 0)
+     
+spill(5)..  X(5,turbine) - X(5,irrigation) + X(5,spill) - X(5,A) =E= 0 ; (LHS = 0)
+     
+spill(6)..  X(6,turbine) - X(6,irrigation) + X(6,spill) - X(6,A) =E= 0 ; (LHS = 0)
+     
+
+---- Aminimum  =G=  minimum flow to A
+
+Aminimum(1)..  X(1,A) =G= 1 ; (LHS = 0, INFES = 1 ****)
+     
+Aminimum(2)..  X(2,A) =G= 1 ; (LHS = 0, INFES = 1 ****)
+     
+Aminimum(3)..  X(3,A) =G= 1 ; (LHS = 0, INFES = 1 ****)
+     
+Aminimum(4)..  X(4,A) =G= 1 ; (LHS = 0, INFES = 1 ****)
+     
+Aminimum(5)..  X(5,A) =G= 1 ; (LHS = 0, INFES = 1 ****)
+     
+Aminimum(6)..  X(6,A) =G= 1 ; (LHS = 0, INFES = 1 ****)
+     
+
+---- resendstorage  =G=  Ending storage >= beginning storage
+
+resendstorage..  X(6,reservoir) =G= 5 ; (LHS = 0, INFES = 5 ****)
+     
+
+---- turbinecap  =L=  turbine capacity
+
+turbinecap(1)..  X(1,turbine) =L= 4 ; (LHS = 0)
+     
+turbinecap(2)..  X(2,turbine) =L= 4 ; (LHS = 0)
+     
+turbinecap(3)..  X(3,turbine) =L= 4 ; (LHS = 0)
+     
+turbinecap(4)..  X(4,turbine) =L= 4 ; (LHS = 0)
+     
+turbinecap(5)..  X(5,turbine) =L= 4 ; (LHS = 0)
+     
+turbinecap(6)..  X(6,turbine) =L= 4 ; (LHS = 0)
+     
+
+---- resmax  =L=  reservoir capacity limit
+
+resmax(1)..  X(1,reservoir) =L= 9 ; (LHS = 0)
+     
+resmax(2)..  X(2,reservoir) =L= 9 ; (LHS = 0)
+     
+resmax(3)..  X(3,reservoir) =L= 9 ; (LHS = 0)
+     
+resmax(4)..  X(4,reservoir) =L= 9 ; (LHS = 0)
+     
+resmax(5)..  X(5,reservoir) =L= 9 ; (LHS = 0)
+     
+resmax(6)..  X(6,reservoir) =L= 9 ; (LHS = 0)
+     
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/03/26 22:06:51 Page 3
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Column Listing      SOLVE Reservoir Using LP From line 82
+
+
+---- X  Quantity of water flow each month to each location
+
+X(1,turbine)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -1.6     COST
+        1       resemassbalance(1)
+        1       spill(1)
+        1       turbinecap(1)
+
+X(1,irrigation)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -1       COST
+       -1       spill(1)
+
+X(1,reservoir)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1       resemassbalance(1)
+       -1       resemassbalance(2)
+        1       resmax(1)
+
+REMAINING 27 ENTRIES SKIPPED
+
+---- VCOST  total benifits ($)
+
+VCOST
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       COST
+
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/03/26 22:06:51 Page 4
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Range Statistics    SOLVE Reservoir Using LP From line 82
+
+
+RANGE STATISTICS (ABSOLUTE NON-ZERO FINITE VALUES)
+
+RHS       [min, max] : [ 1.000E+00, 9.000E+00] - Zero values observed as well
+Bound     [min, max] : [        NA,        NA] - Zero values observed as well
+Matrix    [min, max] : [ 1.000E+00, 2.200E+00]
+
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/03/26 22:06:51 Page 5
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Model Statistics    SOLVE Reservoir Using LP From line 82
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           7     SINGLE EQUATIONS           32
+BLOCKS OF VARIABLES           2     SINGLE VARIABLES           31
+NON ZERO ELEMENTS            79
+
+
+GENERATION TIME      =        0.007 SECONDS      4 MB  54.4.0 9a60ae27 DAX-DAC
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/03/26 22:06:51 Page 6
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Solution Report     SOLVE Reservoir Using LP From line 82
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   Reservoir           OBJECTIVE  VCOST
+     TYPE    LP                  DIRECTION  MAXIMIZE
+     SOLVER  CPLEX               FROM LINE  82
+
+**** SOLVER STATUS     1 Normal Completion
+**** MODEL STATUS      1 Optimal
+**** OBJECTIVE VALUE               51.6000
+
+ RESOURCE USAGE, LIMIT          0.004 10000000000.000
+ ITERATION COUNT, LIMIT        16    2147483647
+*** This solver runs with a community license.
+--- GMO setup time: 0.00s
+--- GMO memory 0.50 Mb (peak 0.50 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 22.1.2.0 link memory 0.00 Mb (peak 0.00 Mb)
+--- Starting Cplex
+
+
+--- LP status (1): optimal.
+--- Cplex Time: 0.00sec (det. 0.06 ticks)
+
+
+Optimal solution found
+Objective:           51.600000
+
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU COST                .              .              .             1.0000      
+
+  COST  Total cost ($) and objective function value
+
+---- EQU resemassbalance  Reservoir storage mass balance
+
+         LOWER          LEVEL          UPPER         MARGINAL
+
+1         7.0000         7.0000         7.0000         3.7000      
+2         2.0000         2.0000         2.0000         3.7000      
+3         3.0000         3.0000         3.0000         3.7000      
+4         4.0000         4.0000         4.0000         3.7000      
+5         3.0000         3.0000         3.0000         3.7000      
+6         2.0000         2.0000         2.0000         3.7000      
+
+---- EQU spill  water flow to spill
+
+         LOWER          LEVEL          UPPER         MARGINAL
+
+1          .              .              .            -2.1000      
+2          .              .              .            -2.0000      
+3          .              .              .            -1.9000      
+4          .              .              .            -2.0000      
+5          .              .              .            -2.2000      
+6          .              .              .            -2.2000      
+
+---- EQU Aminimum  minimum flow to A
+
+         LOWER          LEVEL          UPPER         MARGINAL
+
+1         1.0000         1.0000        +INF           -2.1000      
+2         1.0000         1.0000        +INF           -2.0000      
+3         1.0000         1.0000        +INF           -1.9000      
+4         1.0000         1.0000        +INF           -2.0000      
+5         1.0000         1.0000        +INF           -2.2000      
+6         1.0000         1.0000        +INF           -2.2000      
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- EQU resendsto~         5.0000         5.0000        +INF           -3.7000      
+
+  resendstorage  Ending storage >= beginning storage
+
+---- EQU turbinecap  turbine capacity
+
+         LOWER          LEVEL          UPPER         MARGINAL
+
+1        -INF            1.0000         4.0000          .          
+2        -INF            1.0000         4.0000          .          
+3        -INF            2.0000         4.0000          .          
+4        -INF            4.0000         4.0000         0.2000      
+5        -INF            4.0000         4.0000         0.5000      
+6        -INF            4.0000         4.0000         0.5000      
+
+---- EQU resmax  reservoir capacity limit
+
+         LOWER          LEVEL          UPPER         MARGINAL
+
+1        -INF            6.0000         9.0000          .          
+2        -INF            7.0000         9.0000          .          
+3        -INF            8.0000         9.0000          .          
+4        -INF            8.0000         9.0000          .          
+5        -INF            7.0000         9.0000          .          
+6        -INF            5.0000         9.0000          .          
+
+---- VAR X  Quantity of water flow each month to each location
+
+                    LOWER          LEVEL          UPPER         MARGINAL
+
+1.turbine             .             1.0000        +INF             .          
+1.irrigation          .              .            +INF           -1.1000      
+1.reservoir           .             6.0000        +INF             .          
+1.spill               .              .            +INF           -1.6000      
+1.A                   .             1.0000        +INF             .          
+2.turbine             .             1.0000        +INF             .          
+2.irrigation          .              .            +INF           -0.8000      
+2.reservoir           .             7.0000        +INF             .          
+2.spill               .              .            +INF           -1.7000      
+2.A                   .             1.0000        +INF             .          
+3.turbine             .             2.0000        +INF             .          
+3.irrigation          .             1.0000        +INF             .          
+3.reservoir           .             8.0000        +INF             .          
+3.spill               .              .            +INF           -1.8000      
+3.A                   .             1.0000        +INF             .          
+4.turbine             .             4.0000        +INF             .          
+4.irrigation          .             3.0000        +INF             .          
+4.reservoir           .             8.0000        +INF             .          
+4.spill               .              .            +INF           -1.7000      
+4.A                   .             1.0000        +INF             .          
+5.turbine             .             4.0000        +INF             .          
+5.irrigation          .             3.0000        +INF             .          
+5.reservoir           .             7.0000        +INF             .          
+5.spill               .              .            +INF           -1.5000      
+5.A                   .             1.0000        +INF             .          
+6.turbine             .             4.0000        +INF             .          
+6.irrigation          .             3.0000        +INF             .          
+6.reservoir           .             5.0000        +INF             .          
+6.spill               .              .            +INF           -1.5000      
+6.A                   .             1.0000        +INF             .          
+
+                           LOWER          LEVEL          UPPER         MARGINAL
+
+---- VAR VCOST             -INF           51.6000        +INF             .          
+
+  VCOST  total benifits ($)
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+
+
+EXECUTION TIME       =        0.092 SECONDS      4 MB  54.4.0 9a60ae27 DAX-DAC
+
+
+USER: Course License                                 G260818+0003Ac-GEN
+      Utah State University                                     DCE5615
+      License for teaching and research at degree granting institutions
+
+
+**** FILE SUMMARY
+
+Input      /Users/bashar/Desktop/GAMS/CEE_6410_Rosenberg/CEE-6410-Rosenberg/HW4.gms
+Output     /Users/bashar/Desktop/GAMS/CEE_6410_Rosenberg/CEE-6410-Rosenberg/HW4.lst

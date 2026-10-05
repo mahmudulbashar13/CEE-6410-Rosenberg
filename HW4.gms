@@ -1,80 +1,77 @@
 $ontext
-CEE 6410 - Network Shipping Problem - Automobiles
-
-An automobile company must decide how to move cars from suppliers in Kansas City and Dallas to dealerships in New York, Minneapolis, Seattle, and San Francisco.
-
-THE PROBLEM:
-
-Each supplier has a specified number of cars in stock and each dealership has an expected number of sales. Data are as fol-lows:
-
-
-Inputs:    Suppliers   Dealers
-Cost of each route: Rows are suppliers, Coloumns are dealers.
-                New York            Minneapolis     Seattle     San Francisco
-Kansas          $400                  $1200             $1800         $1800
-Dallas          $900                  $1500             $1700         $2100              
-
-Determine the shipping volumes that will minimze cost.
-
-THE SOLUTION:
-Minimize shipping cost.
-
-David E Rosenberg
-david.rosenberg@usu.edu
+Reservoir Problem
 September 15, 2015
 $offtext
 
 * 1. DEFINE the SETS
-SETS suppliers  cars in stock /Kansas, Dallas/
-     dealers expected sales /Minneapolis, Newyork, Sanfrancisco, Seattle /;
+SETS time  month /1, 2, 3, 4, 5, 6/
+     spatial water flow /turbine,irrigation,reservoir,spill,A/;
+
 
 * 2. DEFINE input data
 PARAMETERS
-   c(suppliers) Capacity of cars
-         /Kansas 1000,
-          Dallas 800 /
+   
+    
+   inflow(time) Inflow
+         /1 2,
+          2 2,
+          3 3,
+          4 4,
+          5 3,
+          6 2/;
 
-   b(dealers) Expected sales in quantity of cars
-          /Minneapolis 400,
-           Newyork  250
-           Sanfrancisco 450,
-           Seattle  450/;
+SCALARS
+    reservoirmax     reservoir capcaity          /9/
+    reservoirinit    reservoir initial storage  /5/
+    turbinemax    Turbine capacity             /4/
+    Amin     Minimum flow at A                /1/ ;
 
-TABLE A(suppliers,dealers) Cost of each supplier to dealer route
-                 Minneapolis  Newyork  Sanfrancisco Seattle  
- Kansas          400            1200       1800           1800
- Dallas          900            1500       1700           2100;
-
+TABLE A(time,spatial) Benifits
+           turbine  irrigation  reservoir   spill   A  
+ 1         1.6      1.0         0           0       0    
+ 2         1.7      1.2         0           0       0
+ 3         1.8      1.9         0           0       0
+ 4         1.9      2.0         0           0       0
+ 5         2.0      2.2         0           0       0
+ 6         2.0      2.2         0           0       0;
 
 * 3. DEFINE the variables
 VARIABLES
-    X(suppliers,dealers) Quantity of cars to send from one supplier to one dealer 8 dimensions total,
-    VCOST  total cost ($);
-*X1 From Kansas to Newyork
-*X2 From Kansas to Minneapolis
-*X3 From kansas to Seattle
-*X4 From Kansas to San Francisco
-*Y1 From Dallas to Newyork
-*Y2 From Dallas to Minneapolis
-*Y3 From Dallas to Seattle
-*Y4 From Dallas to San Francicso
+    X(time,spatial) Quantity of water flow each month to each location,
+    VCOST  total benifits ($);
+
 
 
 * Non-negativity constraints
-POSITIVE VARIABLES X;
+POSITIVE VARIABLES X(time,spatial);
 
 * 4. COMBINE variables and data in equations
 EQUATIONS
-   COST Total cost ($) and objective function value
-   RES_CONSTRAIN1(suppliers) constraint of how many cars are in stock for each supplier,RES_CONSTRAIN2(dealers) constraint of minimum number of cars sold by each dealer ;
+    COST Total cost ($) and objective function value
+    resemassbalance(time)     Reservoir storage mass balance
+    spill(time)       water flow to spill
+    Aminimum(time)    minimum flow to A
+    resendstorage           Ending storage >= beginning storage
+    turbinecap(time)     turbine capacity
+    resmax(time)      reservoir capacity limit ;
+    
+COST..                 VCOST =E= SUM((time,spatial), A(time,spatial)*X(time,spatial));
+resemassbalance(time)..   X(time,'reservoir') - reservoirinit$(ord(time) eq 1)
+                          - X(time-1,'reservoir')$(ord(time) gt 1)
+                          =E= inflow(time) - X(time,'turbine') - X(time,'spill');
+spill(time)..             X(time,'turbine') + X(time,'spill')
+                          =E= X(time,'irrigation') + X(time,'A');
 
-COST..                 VCOST =E= SUM((suppliers,dealers), A(suppliers,dealers)*X(suppliers,dealers));
-RES_CONSTRAIN1(suppliers) ..    SUM(dealers, X(suppliers,dealers)) =L= c(suppliers);
-RES_CONSTRAIN2(dealers) ..    SUM(suppliers, X(suppliers,dealers)) =G= b(dealers);
+Aminimum(time)..          X(time,'A') =G= Amin;
 
+resendstorage..           X('6','reservoir') =G= reservoirinit;
+
+turbinecap(time)..        X(time,'turbine') =L= turbinemax;
+
+resmax(time)..            X(time,'reservoir') =L= reservoirmax;
 
 * 5. DEFINE the MODEL from the EQUATIONS
-MODEL NETWORK /COST, RES_CONSTRAIN1,RES_CONSTRAIN2/;
+MODEL Reservoir /ALL/;
 *Altnerative way to write (include all previously defined equations)
 *MODEL PLANTING /ALL/;
 
@@ -82,7 +79,7 @@ OPTION LIMROW = 10;
 * 6. SOLVE the MODEL
 * Solve the Network model using a Linear Programming Solver (see File=>Options=>Solvers)
 *     to minimize VCOST
-SOLVE NETWORK USING LP MINIMIZING VCOST;
+SOLVE Reservoir USING LP MAXIMIZING VCOST;
 
 
 * 6. CLick File menu => RUN (F9) or Solve icon and examine solution report in .LST file
