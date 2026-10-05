@@ -1,5 +1,5 @@
 
---- Job HW4.gms Start 10/03/26 22:06:51 54.4.0 9a60ae27 DAX-DAC arm 64bit/macOS
+--- Job HW4.gms Start 10/04/26 22:48:44 54.4.0 9a60ae27 DAX-DAC arm 64bit/macOS
 --- Applying:
     /Library/Frameworks/GAMS.framework/Versions/54/Resources/gmsprmun.txt
 --- GAMS Parameters defined
@@ -17,27 +17,32 @@ Licensee: Course License                                 G260818+0003Ac-GEN
           Utah State University                                     DCE5615
           225a/gamslice.dat
           1d9a2824-f32d-4897
-          node:27619205 mem:16 cores:10 ipport:58528 v:2                   
+          node:27619205 mem:16 cores:10 ipport:65495 v:2                   
           Course license for use within the course and related course work
           The time-limited license stops working on : Jun 14, 2027
 System information: 10 physical cores and 16 Gb physical memory detected
 GAMS 54.4.0   Copyright (C) 1987-2026 GAMS Development. All rights reserved
 --- Starting compilation
---- HW4.gms(85) 3 Mb
---- Starting execution: elapsed 0:00:00.003
---- HW4.gms(78) 4 Mb
+--- HW4.gms(90) 3 Mb
+--- Starting execution: elapsed 0:00:00.004
+--- HW4.gms(86) 4 Mb
 --- Generating LP model Reservoir
---- HW4.gms(82) 4 Mb
+--- HW4.gms(87) 4 Mb
 ---   32 rows  31 columns  79 non-zeroes
 --- Range statistics (absolute non-zero finite values)
 --- RHS       [min, max] : [ 1.000E+00, 9.000E+00] - Zero values observed as well
 --- Bound     [min, max] : [        NA,        NA] - Zero values observed as well
 --- Matrix    [min, max] : [ 1.000E+00, 2.200E+00]
---- Executing CPLEX (Solvelink=2): elapsed 0:00:00.010
+--- Executing CPLEX (Solvelink=2): elapsed 0:00:00.009
 
 IBM ILOG CPLEX   54.4.0 9a60ae27 Sep 9, 2026           DAC arm 64bit/macOS    
 
 *** This solver runs with a community license.
+
+--- Reading option file '/Users/bashar/Desktop/GAMS/CEE_6410_Rosenberg/CEE-6410-Rosenberg/cplex.opt':
+--- Setting 'objrng': all
+--- Setting 'rhsrng': all
+
 --- GMO setup time: 0.00s
 --- GMO memory 0.50 Mb (peak 0.50 Mb)
 --- Dictionary memory 0.00 Mb
@@ -62,7 +67,81 @@ Iteration:     1   Dual infeasibility =             8.299999
 Iteration:     9   Dual objective     =            66.200000
 
 --- LP status (1): optimal.
---- Cplex Time: 0.00sec (det. 0.06 ticks)
+--- Cplex Time: 0.01sec (det. 0.06 ticks)
+
+--- Start ranging / sensitivity analysis...
+--- Right-hand-side ranging...
+
+EQUATION NAME                            LOWER           CURRENT             UPPER
+-------------                            -----           -------             -----
+COST                                      -INF                NA              +INF   
+resemassbalance(1)                           6                 7                 9   
+resemassbalance(2)                           1                 2                 4   
+resemassbalance(3)                           2                 3                 5   
+resemassbalance(4)                           3                 4                 6   
+resemassbalance(5)                           2                 3                 5   
+resemassbalance(6)                           1                 2                 4   
+spill(1)                                    -1                 0                 1   
+spill(2)                                    -1                 0                 1   
+spill(3)                                  -INF                 0                 1   
+spill(4)                                  -INF                 0                 3   
+spill(5)                                  -INF                 0                 3   
+spill(6)                                  -INF                 0                 3   
+Aminimum(1)                                  0                 1                 2   
+Aminimum(2)                                  0                 1                 2   
+Aminimum(3)                                  0                 1                 2   
+Aminimum(4)                                  0                 1                 4   
+Aminimum(5)                                  0                 1                 4   
+Aminimum(6)                                  0                 1                 4   
+resendstorage                                3                 5                 6   
+turbinecap(1)                                1                 4              +INF   
+turbinecap(2)                                1                 4              +INF   
+turbinecap(3)                                2                 4              +INF   
+turbinecap(4)                                2                 4                 5   
+turbinecap(5)                                2                 4                 5   
+turbinecap(6)                                2                 4                 5   
+resmax(1)                                    6                 9              +INF   
+resmax(2)                                    7                 9              +INF   
+resmax(3)                                    8                 9              +INF   
+resmax(4)                                    8                 9              +INF   
+resmax(5)                                    7                 9              +INF   
+resmax(6)                                    5                 9              +INF   
+
+--- Objective ranging...
+
+VARIABLE NAME                            LOWER           CURRENT             UPPER
+-------------                            -----           -------             -----
+X(1.turbine)                                 0               1.6               2.7   
+X(1.irrigation)                           -INF                 1               2.1   
+X(1.reservoir)                            -1.1                 0              +INF   
+X(1.spill)                                -INF                 0               1.6   
+X(1.A)                                    -INF                 0               2.1   
+X(2.turbine)                      -2.22045e-16               1.7               2.5   
+X(2.irrigation)                           -INF               1.2                 2   
+X(2.reservoir)                            -0.8                 0              +INF   
+X(2.spill)                                -INF                 0               1.7   
+X(2.A)                                    -INF                 0                 2   
+X(3.turbine)                                 1               1.8                 2   
+X(3.irrigation)                            1.1               1.9               2.1   
+X(3.reservoir)                            -0.2                 0               1.5   
+X(3.spill)                                -INF                 0               1.8   
+X(3.A)                                    -INF                 0               1.9   
+X(4.turbine)                               1.7               1.9              +INF   
+X(4.irrigation)                            1.8                 2               3.7   
+X(4.reservoir)                            -0.5                 0               1.5   
+X(4.spill)                                -INF                 0               1.7   
+X(4.A)                                    -INF                 0                 2   
+X(5.turbine)                               1.5                 2              +INF   
+X(5.irrigation)                            1.7               2.2               3.7   
+X(5.reservoir)                            -0.5                 0               1.5   
+X(5.spill)                                -INF                 0               1.5   
+X(5.A)                                    -INF                 0               2.2   
+X(6.turbine)                               1.5                 2              +INF   
+X(6.irrigation)                            1.7               2.2               3.7   
+X(6.reservoir)                            -INF                 0               3.7   
+X(6.spill)                                -INF                 0               1.5   
+X(6.A)                                    -INF                 0               2.2   
+VCOST                                     -INF                NA              +INF   
 
 
 Optimal solution found
@@ -70,4 +149,4 @@ Objective:           51.600000
 
 --- Reading solution for model Reservoir
 *** Status: Normal completion
---- Job HW4.gms Stop 10/03/26 22:06:51 elapsed 0:00:00.095
+--- Job HW4.gms Stop 10/04/26 22:48:44 elapsed 0:00:00.051

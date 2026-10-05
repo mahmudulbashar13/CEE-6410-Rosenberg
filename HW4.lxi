@@ -1,24 +1,24 @@
 B 3 C o m p i l a t i o n
-B 94 Equation Listing    SOLVE Reservoir Using LP From line 82
-D 97 COST
-D 102 resemassbalance
-D 117 spill
-D 132 Aminimum
-D 147 resendstorage
-D 152 turbinecap
-D 167 resmax
-B 183 Column Listing      SOLVE Reservoir Using LP From line 82
-E 186 X
-E 208 VCOST
-B 216 Range Statistics    SOLVE Reservoir Using LP From line 82
-B 227 Model Statistics    SOLVE Reservoir Using LP From line 82
-B 240 Solution Report     SOLVE Reservoir Using LP From line 82
-F 273 COST
-F 277 resemassbalance
-F 288 spill
-F 299 Aminimum
-F 312 resendstorage
-F 316 turbinecap
-F 327 resmax
-G 338 X
-G 375 VCOST
+B 99 Equation Listing    SOLVE Reservoir Using LP From line 87
+D 102 COST
+D 107 resemassbalance
+D 122 spill
+D 137 Aminimum
+D 152 resendstorage
+D 157 turbinecap
+D 172 resmax
+B 188 Column Listing      SOLVE Reservoir Using LP From line 87
+E 191 X
+E 213 VCOST
+B 221 Range Statistics    SOLVE Reservoir Using LP From line 87
+B 232 Model Statistics    SOLVE Reservoir Using LP From line 87
+B 245 Solution Report     SOLVE Reservoir Using LP From line 87
+F 357 COST
+F 361 resemassbalance
+F 372 spill
+F 383 Aminimum
+F 396 resendstorage
+F 400 turbinecap
+F 411 resmax
+G 422 X
+G 459 VCOST

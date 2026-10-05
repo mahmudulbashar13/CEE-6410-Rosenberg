@@ -70,6 +70,10 @@ turbinecap(time)..        X(time,'turbine') =L= turbinemax;
 
 resmax(time)..            X(time,'reservoir') =L= reservoirmax;
 
+*X.LO('1','irrigation') =  1;
+*X.LO('2','irrigation') =  1;
+*X.LO('3','irrigation') = 2;
+
 * 5. DEFINE the MODEL from the EQUATIONS
 MODEL Reservoir /ALL/;
 *Altnerative way to write (include all previously defined equations)
@@ -79,6 +83,7 @@ OPTION LIMROW = 10;
 * 6. SOLVE the MODEL
 * Solve the Network model using a Linear Programming Solver (see File=>Options=>Solvers)
 *     to minimize VCOST
+Reservoir.optfile = 1;
 SOLVE Reservoir USING LP MAXIMIZING VCOST;
 
 

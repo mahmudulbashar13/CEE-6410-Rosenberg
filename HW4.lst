@@ -1,4 +1,4 @@
-GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/03/26 22:06:51 Page 1
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/04/26 22:48:44 Page 1
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
 C o m p i l a t i o n
 
@@ -73,25 +73,30 @@ C o m p i l a t i o n
   70   
   71  resmax(time)..            X(time,'reservoir') =L= reservoirmax;
   72   
-  73  * 5. DEFINE the MODEL from the EQUATIONS
-  74  MODEL Reservoir /ALL/;
-  75  *Altnerative way to write (include all previously defined equations)
-  76  *MODEL PLANTING /ALL/;
-  77   
-  78  OPTION LIMROW = 10;
-  79  * 6. SOLVE the MODEL
-  80  * Solve the Network model using a Linear Programming Solver (see File=>Options=>Solvers)
-  81  *     to minimize VCOST
-  82  SOLVE Reservoir USING LP MAXIMIZING VCOST;
-  83   
-  84   
-  85  * 6. CLick File menu => RUN (F9) or Solve icon and examine solution report in .LST file
+  73  *X.LO('1','irrigation') =  1;
+  74  *X.LO('2','irrigation') =  1;
+  75  *X.LO('3','irrigation') = 2;
+  76   
+  77  * 5. DEFINE the MODEL from the EQUATIONS
+  78  MODEL Reservoir /ALL/;
+  79  *Altnerative way to write (include all previously defined equations)
+  80  *MODEL PLANTING /ALL/;
+  81   
+  82  OPTION LIMROW = 10;
+  83  * 6. SOLVE the MODEL
+  84  * Solve the Network model using a Linear Programming Solver (see File=>Options=>Solvers)
+  85  *     to minimize VCOST
+  86  Reservoir.optfile = 1;
+  87  SOLVE Reservoir USING LP MAXIMIZING VCOST;
+  88   
+  89   
+  90  * 6. CLick File menu => RUN (F9) or Solve icon and examine solution report in .LST file
 
 
-COMPILATION TIME     =        0.000 SECONDS      3 MB  54.4.0 9a60ae27 DAX-DAC
-GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/03/26 22:06:51 Page 2
+COMPILATION TIME     =        0.001 SECONDS      3 MB  54.4.0 9a60ae27 DAX-DAC
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/04/26 22:48:44 Page 2
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Equation Listing    SOLVE Reservoir Using LP From line 82
+Equation Listing    SOLVE Reservoir Using LP From line 87
 
 
 ---- COST  =E=  Total cost ($) and objective function value
@@ -178,9 +183,9 @@ resmax(5)..  X(5,reservoir) =L= 9 ; (LHS = 0)
      
 resmax(6)..  X(6,reservoir) =L= 9 ; (LHS = 0)
      
-GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/03/26 22:06:51 Page 3
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/04/26 22:48:44 Page 3
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Column Listing      SOLVE Reservoir Using LP From line 82
+Column Listing      SOLVE Reservoir Using LP From line 87
 
 
 ---- X  Quantity of water flow each month to each location
@@ -211,9 +216,9 @@ VCOST
                 (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
         1       COST
 
-GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/03/26 22:06:51 Page 4
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/04/26 22:48:44 Page 4
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Range Statistics    SOLVE Reservoir Using LP From line 82
+Range Statistics    SOLVE Reservoir Using LP From line 87
 
 
 RANGE STATISTICS (ABSOLUTE NON-ZERO FINITE VALUES)
@@ -222,9 +227,9 @@ RHS       [min, max] : [ 1.000E+00, 9.000E+00] - Zero values observed as well
 Bound     [min, max] : [        NA,        NA] - Zero values observed as well
 Matrix    [min, max] : [ 1.000E+00, 2.200E+00]
 
-GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/03/26 22:06:51 Page 5
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/04/26 22:48:44 Page 5
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Model Statistics    SOLVE Reservoir Using LP From line 82
+Model Statistics    SOLVE Reservoir Using LP From line 87
 
 
 MODEL STATISTICS
@@ -234,25 +239,30 @@ BLOCKS OF VARIABLES           2     SINGLE VARIABLES           31
 NON ZERO ELEMENTS            79
 
 
-GENERATION TIME      =        0.007 SECONDS      4 MB  54.4.0 9a60ae27 DAX-DAC
-GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/03/26 22:06:51 Page 6
+GENERATION TIME      =        0.005 SECONDS      4 MB  54.4.0 9a60ae27 DAX-DAC
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/04/26 22:48:44 Page 6
 G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
-Solution Report     SOLVE Reservoir Using LP From line 82
+Solution Report     SOLVE Reservoir Using LP From line 87
 
 
                S O L V E      S U M M A R Y
 
      MODEL   Reservoir           OBJECTIVE  VCOST
      TYPE    LP                  DIRECTION  MAXIMIZE
-     SOLVER  CPLEX               FROM LINE  82
+     SOLVER  CPLEX               FROM LINE  87
 
 **** SOLVER STATUS     1 Normal Completion
 **** MODEL STATUS      1 Optimal
 **** OBJECTIVE VALUE               51.6000
 
- RESOURCE USAGE, LIMIT          0.004 10000000000.000
+ RESOURCE USAGE, LIMIT          0.005 10000000000.000
  ITERATION COUNT, LIMIT        16    2147483647
 *** This solver runs with a community license.
+
+--- Reading option file '/Users/bashar/Desktop/GAMS/CEE_6410_Rosenberg/CEE-6410-Rosenberg/cplex.opt':
+--- Setting 'objrng': all
+--- Setting 'rhsrng': all
+
 --- GMO setup time: 0.00s
 --- GMO memory 0.50 Mb (peak 0.50 Mb)
 --- Dictionary memory 0.00 Mb
@@ -261,7 +271,81 @@ Solution Report     SOLVE Reservoir Using LP From line 82
 
 
 --- LP status (1): optimal.
---- Cplex Time: 0.00sec (det. 0.06 ticks)
+--- Cplex Time: 0.01sec (det. 0.06 ticks)
+
+--- Start ranging / sensitivity analysis...
+--- Right-hand-side ranging...
+
+EQUATION NAME                            LOWER           CURRENT             UPPER
+-------------                            -----           -------             -----
+COST                                      -INF                NA              +INF   =C
+resemassbalance(1)                           6                 7                 9   =C
+resemassbalance(2)                           1                 2                 4   =C
+resemassbalance(3)                           2                 3                 5   =C
+resemassbalance(4)                           3                 4                 6   =C
+resemassbalance(5)                           2                 3                 5   =C
+resemassbalance(6)                           1                 2                 4   =C
+spill(1)                                    -1                 0                 1   =C
+spill(2)                                    -1                 0                 1   =C
+spill(3)                                  -INF                 0                 1   =C
+spill(4)                                  -INF                 0                 3   =C
+spill(5)                                  -INF                 0                 3   =C
+spill(6)                                  -INF                 0                 3   =C
+Aminimum(1)                                  0                 1                 2   =C
+Aminimum(2)                                  0                 1                 2   =C
+Aminimum(3)                                  0                 1                 2   =C
+Aminimum(4)                                  0                 1                 4   =C
+Aminimum(5)                                  0                 1                 4   =C
+Aminimum(6)                                  0                 1                 4   =C
+resendstorage                                3                 5                 6   =C
+turbinecap(1)                                1                 4              +INF   =C
+turbinecap(2)                                1                 4              +INF   =C
+turbinecap(3)                                2                 4              +INF   =C
+turbinecap(4)                                2                 4                 5   =C
+turbinecap(5)                                2                 4                 5   =C
+turbinecap(6)                                2                 4                 5   =C
+resmax(1)                                    6                 9              +INF   =C
+resmax(2)                                    7                 9              +INF   =C
+resmax(3)                                    8                 9              +INF   =C
+resmax(4)                                    8                 9              +INF   =C
+resmax(5)                                    7                 9              +INF   =C
+resmax(6)                                    5                 9              +INF   =C
+
+--- Objective ranging...
+
+VARIABLE NAME                            LOWER           CURRENT             UPPER
+-------------                            -----           -------             -----
+X(1.turbine)                                 0               1.6               2.7   =C
+X(1.irrigation)                           -INF                 1               2.1   =C
+X(1.reservoir)                            -1.1                 0              +INF   =C
+X(1.spill)                                -INF                 0               1.6   =C
+X(1.A)                                    -INF                 0               2.1   =C
+X(2.turbine)                      -2.22045e-16               1.7               2.5   =C
+X(2.irrigation)                           -INF               1.2                 2   =C
+X(2.reservoir)                            -0.8                 0              +INF   =C
+X(2.spill)                                -INF                 0               1.7   =C
+X(2.A)                                    -INF                 0                 2   =C
+X(3.turbine)                                 1               1.8                 2   =C
+X(3.irrigation)                            1.1               1.9               2.1   =C
+X(3.reservoir)                            -0.2                 0               1.5   =C
+X(3.spill)                                -INF                 0               1.8   =C
+X(3.A)                                    -INF                 0               1.9   =C
+X(4.turbine)                               1.7               1.9              +INF   =C
+X(4.irrigation)                            1.8                 2               3.7   =C
+X(4.reservoir)                            -0.5                 0               1.5   =C
+X(4.spill)                                -INF                 0               1.7   =C
+X(4.A)                                    -INF                 0                 2   =C
+X(5.turbine)                               1.5                 2              +INF   =C
+X(5.irrigation)                            1.7               2.2               3.7   =C
+X(5.reservoir)                            -0.5                 0               1.5   =C
+X(5.spill)                                -INF                 0               1.5   =C
+X(5.A)                                    -INF                 0               2.2   =C
+X(6.turbine)                               1.5                 2              +INF   =C
+X(6.irrigation)                            1.7               2.2               3.7   =C
+X(6.reservoir)                            -INF                 0               3.7   =C
+X(6.spill)                                -INF                 0               1.5   =C
+X(6.A)                                    -INF                 0               2.2   =C
+VCOST                                     -INF                NA              +INF   =C
 
 
 Optimal solution found
@@ -382,7 +466,7 @@ Objective:           51.600000
                              0  UNBOUNDED
 
 
-EXECUTION TIME       =        0.092 SECONDS      4 MB  54.4.0 9a60ae27 DAX-DAC
+EXECUTION TIME       =        0.047 SECONDS      4 MB  54.4.0 9a60ae27 DAX-DAC
 
 
 USER: Course License                                 G260818+0003Ac-GEN
