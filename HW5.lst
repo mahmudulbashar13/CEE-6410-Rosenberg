@@ -1,0 +1,463 @@
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/19/26 22:29:16 Page 1
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+      CEE 6410 Fall 2015
+      Problem 7.4
+       
+      A farmer plans to develop water for irrigation. He is considering two possible sources of
+      water: a gravity diversion from a possible reservoir with two alternative capacities and/or a
+      pump from a lower river diversion (refer to Figure 7.3). Between the reservoir and pump
+      site the river base flow increases by 2 acft/day due to groundwater drainage into the river.
+      Ignore losses from the reservoir. The river flow into the reservoir and the farmer's demand
+      during each of two six-month seasons of the year are given in Table 7.5. Revenue is estimated
+      at $300 per year per acre irrigated.
+       
+      Season, t River Inflow, Qt (acft) Irrigation Demand (acft/acre)
+      1 600 1.0
+      2 200 3.0
+       
+      Assume that there are only two possible sizes of reservoir: a high dam that has capacity of
+      700 acft or a low dam with capacity of 300 acft. The capital costs are $10,000/year and
+      $6,000/year for the high and low dams, respectively (no operating cost). The pump capacity
+      is fixed at 2.2 acft/day with a capital cost (if it is built) of $8,000/year and operating cost
+      of $20/acft.
+       
+      Integer version using INTEGER VARIABLES statement and SOLVE as MIP.
+       
+      David E Rosenberg
+      david.rosenberg@usu.edu
+      September 28, 2015
+  29   
+  30  * 1. DEFINE the SETS
+  31  SETS src water supply sources /rh "reservoir high", rl "reservoir low",p "pump"/
+  32      time year /y1 "Season 1", y2 "Season 2"/;
+  33   
+  34  * 2. DEFINE input data
+  35  PARAMETERS
+  36     CapCost(src) capital cost ($ to build)
+  37           /rh 10000,
+  38            rl 6000,
+  39            p 8000/
+  40     OpCost(src) operating cost ($ per ac-ft)
+  41           /rh 0,
+  42            rl 0,
+  43            p 20/
+  44     MaxCapacity(src) Maximum capacity of source when built (ac-ft per year)
+  45           /rh 700,
+  46            rl 300,
+  47            p 396/
+  48     Inflow(time) Inflow every season
+  49            /y1 600,
+  50             y2  200/
+  51     Irrigation(time) Inflow every year
+  52            /y1 1,
+  53             y2  3/
+  54   
+  55      GW  groundwater gain /360/
+  56  * 3. DEFINE the variables
+  57  VARIABLES I(src) binary decision to build or do prject from source src (1=yes 0=no)
+  58            X(src,time) volume of water provided by source src (ac-ft per year)
+  59            AC acre to be irrigated
+  60            Spill(time) water flow from reservoir to pump per season
+  61            S(time) carryover storage reservoir
+  62            TCOST  Maximum Benfiits-Cost ($);
+  63   
+  64   
+  65  BINARY VARIABLES I;
+  66  * Non-negativity constraints
+  67  POSITIVE VARIABLES X,AC,Spill,S;
+  68   
+  69  * 4. COMBINE variables and data in equations
+  70  EQUATIONS
+  71     COST            Total Cost ($) and objective function value
+  72     massbal(time) reservoir mass balance
+  73     demand(time)  crop water demand
+  74     storcap(time) storage limited by reservoir built
+  75     relcap_h(time) release only if high reservoir built
+  76     relcap_l(time) release only if low reservoir built
+  77     pumpcap(time) pump capacity
+  78     pumpriver(time) pump limited by river flow
+  79     onereservoir        at most one reservoir;
+  80   
+  81  COST..  TCOST =e= 300*AC
+  82                    - sum(src, CapCost(src)*I(src))
+  83                    - sum((src,time), OpCost(src)*X(src,time));
+  84   
+  85  massbal(time)..  S(time++1) =e= S(time) + Inflow(time) - Spill(time)
+  86                                  - X('rh',time) - X('rl',time);
+  87   
+  88  demand(time)..   sum(src, X(src,time)) =g= Irrigation(time)*AC;
+  89   
+  90  storcap(time)..  S(time) =l= MaxCapacity('rh')*I('rh') + MaxCapacity('rl')*I('rl');
+  91   
+  92  relcap_h(time)..  X('rh',time) =l= (MaxCapacity('rh') + Inflow(time))*I('rh');
+  93  relcap_l(time)..  X('rl',time) =l= (MaxCapacity('rl') + Inflow(time))*I('rl');
+  94   
+  95  pumpcap(time)..  X('p',time) =l= MaxCapacity('p')*I('p');
+  96   
+  97  pumpriver(time).. X('p',time) =l= Spill(time) + GW;
+  98   
+  99  onereservoir..   I('rh') + I('rl') =l= 1;
+ 100   
+ 101  MODEL Irrig /all/;
+ 102  SOLVE Irrig USING mip MAXIMIZING TCOST;
+ 103   
+ 104  * 5. DEFINE the MODEL from the EQUATIONS
+ 105   
+ 106   
+ 107   
+ 108   
+ 109  * Dump all input data and results to a GAMS gdx file
+ 110  *Execute_Unload "Ex6-3-integer.gdx";
+ 111  * Dump the gdx file to an Excel workbook
+ 112  *Execute "gdx2xls Ex6-3-integer.gdx"
+
+
+COMPILATION TIME     =        0.001 SECONDS      3 MB  54.4.0 9a60ae27 DAX-DAC
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/19/26 22:29:16 Page 2
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Equation Listing    SOLVE Irrig Using MIP From line 102
+
+
+---- COST  =E=  Total Cost ($) and objective function value
+
+COST..  10000*I(rh) + 6000*I(rl) + 8000*I(p) + 20*X(p,y1) + 20*X(p,y2) - 300*AC + TCOST =E= 0 ; (LHS = 0)
+     
+
+---- massbal  =E=  reservoir mass balance
+
+massbal(y1)..  X(rh,y1) + X(rl,y1) + Spill(y1) - S(y1) + S(y2) =E= 600 ; (LHS = 0, INFES = 600 ****)
+     
+massbal(y2)..  X(rh,y2) + X(rl,y2) + Spill(y2) + S(y1) - S(y2) =E= 200 ; (LHS = 0, INFES = 200 ****)
+     
+
+---- demand  =G=  crop water demand
+
+demand(y1)..  X(rh,y1) + X(rl,y1) + X(p,y1) - AC =G= 0 ; (LHS = 0)
+     
+demand(y2)..  X(rh,y2) + X(rl,y2) + X(p,y2) - 3*AC =G= 0 ; (LHS = 0)
+     
+
+---- storcap  =L=  storage limited by reservoir built
+
+storcap(y1)..  - 700*I(rh) - 300*I(rl) + S(y1) =L= 0 ; (LHS = 0)
+     
+storcap(y2)..  - 700*I(rh) - 300*I(rl) + S(y2) =L= 0 ; (LHS = 0)
+     
+
+---- relcap_h  =L=  release only if high reservoir built
+
+relcap_h(y1)..  - 1300*I(rh) + X(rh,y1) =L= 0 ; (LHS = 0)
+     
+relcap_h(y2)..  - 900*I(rh) + X(rh,y2) =L= 0 ; (LHS = 0)
+     
+
+---- relcap_l  =L=  release only if low reservoir built
+
+relcap_l(y1)..  - 900*I(rl) + X(rl,y1) =L= 0 ; (LHS = 0)
+     
+relcap_l(y2)..  - 500*I(rl) + X(rl,y2) =L= 0 ; (LHS = 0)
+     
+
+---- pumpcap  =L=  pump capacity
+
+pumpcap(y1)..  - 396*I(p) + X(p,y1) =L= 0 ; (LHS = 0)
+     
+pumpcap(y2)..  - 396*I(p) + X(p,y2) =L= 0 ; (LHS = 0)
+     
+
+---- pumpriver  =L=  pump limited by river flow
+
+pumpriver(y1)..  X(p,y1) - Spill(y1) =L= 360 ; (LHS = 0)
+     
+pumpriver(y2)..  X(p,y2) - Spill(y2) =L= 360 ; (LHS = 0)
+     
+
+---- onereservoir  =L=  at most one reservoir
+
+onereservoir..  I(rh) + I(rl) =L= 1 ; (LHS = 0)
+     
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/19/26 22:29:16 Page 3
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Column Listing      SOLVE Irrig Using MIP From line 102
+
+
+---- I  binary decision to build or do prject from source src (1=yes 0=no)
+
+I(rh)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+    10000       COST
+     -700       storcap(y1)
+     -700       storcap(y2)
+    -1300       relcap_h(y1)
+     -900       relcap_h(y2)
+        1       onereservoir
+
+I(rl)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+     6000       COST
+     -300       storcap(y1)
+     -300       storcap(y2)
+     -900       relcap_l(y1)
+     -500       relcap_l(y2)
+        1       onereservoir
+
+I(p)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+     8000       COST
+     -396       pumpcap(y1)
+     -396       pumpcap(y2)
+
+
+---- X  volume of water provided by source src (ac-ft per year)
+
+X(rh,y1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1       massbal(y1)
+        1       demand(y1)
+        1       relcap_h(y1)
+
+X(rh,y2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1       massbal(y2)
+        1       demand(y2)
+        1       relcap_h(y2)
+
+X(rl,y1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1       massbal(y1)
+        1       demand(y1)
+        1       relcap_l(y1)
+
+REMAINING 3 ENTRIES SKIPPED
+
+---- AC  acre to be irrigated
+
+AC
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+     -300       COST
+       -1       demand(y1)
+       -3       demand(y2)
+
+
+---- Spill  water flow from reservoir to pump per season
+
+Spill(y1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1       massbal(y1)
+       -1       pumpriver(y1)
+
+Spill(y2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1       massbal(y2)
+       -1       pumpriver(y2)
+
+
+---- S  carryover storage reservoir
+
+S(y1)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+       -1       massbal(y1)
+        1       massbal(y2)
+        1       storcap(y1)
+
+S(y2)
+                (.LO, .L, .UP, .M = 0, 0, +INF, 0)
+        1       massbal(y1)
+       -1       massbal(y2)
+        1       storcap(y2)
+
+
+---- TCOST  Maximum Benfiits-Cost ($)
+
+TCOST
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       COST
+
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/19/26 22:29:16 Page 4
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Range Statistics    SOLVE Irrig Using MIP From line 102
+
+
+RANGE STATISTICS (ABSOLUTE NON-ZERO FINITE VALUES)
+
+RHS       [min, max] : [ 1.000E+00, 6.000E+02] - Zero values observed as well
+Bound     [min, max] : [ 1.000E+00, 1.000E+00] - Zero values observed as well
+Matrix    [min, max] : [ 1.000E+00, 1.000E+04]
+
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/19/26 22:29:16 Page 5
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Model Statistics    SOLVE Irrig Using MIP From line 102
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           9     SINGLE EQUATIONS           16
+BLOCKS OF VARIABLES           6     SINGLE VARIABLES           15
+NON ZERO ELEMENTS            49     DISCRETE VARIABLES          3
+
+
+GENERATION TIME      =        0.007 SECONDS      4 MB  54.4.0 9a60ae27 DAX-DAC
+GAMS 54.4.0  9a60ae27 Sep 9, 2026           DAX-DAC arm 64bit/macOS - 10/19/26 22:29:16 Page 6
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Solution Report     SOLVE Irrig Using MIP From line 102
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   Irrig               OBJECTIVE  TCOST
+     TYPE    MIP                 DIRECTION  MAXIMIZE
+     SOLVER  CPLEX               FROM LINE  102
+
+**** SOLVER STATUS     1 Normal Completion
+**** MODEL STATUS      1 Optimal
+**** OBJECTIVE VALUE            81600.0000
+
+ RESOURCE USAGE, LIMIT          0.015 10000000000.000
+ ITERATION COUNT, LIMIT        17    2147483647
+*** This solver runs with a community license.
+--- GMO setup time: 0.00s
+--- GMO memory 0.50 Mb (peak 0.50 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 22.1.2.0 link memory 0.00 Mb (peak 0.00 Mb)
+--- Starting Cplex
+
+
+--- MIP status (101): integer optimal solution.
+--- Cplex Time: 0.01sec (det. 0.19 ticks)
+
+
+Proven optimal solution
+MIP Solution:        81600.000000    (17 iterations, 0 nodes)
+
+Best possible:       81600.000000
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+
+                           LOWER          LEVEL          UPPER
+
+---- EQU COST                .              .              .          
+
+  COST  Total Cost ($) and objective function value
+
+---- EQU massbal  reservoir mass balance
+
+          LOWER          LEVEL          UPPER
+
+y1       600.0000       600.0000       600.0000      
+y2       200.0000       200.0000       200.0000      
+
+---- EQU demand  crop water demand
+
+          LOWER          LEVEL          UPPER
+
+y1          .              .            +INF         
+y2          .              .            +INF         
+
+---- EQU storcap  storage limited by reservoir built
+
+          LOWER          LEVEL          UPPER
+
+y1        -INF         -700.0000          .          
+y2        -INF         -120.0000          .          
+
+---- EQU relcap_h  release only if high reservoir built
+
+          LOWER          LEVEL          UPPER
+
+y1        -INF        -1280.0000          .          
+y2        -INF         -120.0000          .          
+
+---- EQU relcap_l  release only if low reservoir built
+
+          LOWER          LEVEL          UPPER
+
+y1        -INF             .              .          
+y2        -INF             .              .          
+
+---- EQU pumpcap  pump capacity
+
+          LOWER          LEVEL          UPPER
+
+y1        -INF          -36.0000          .          
+y2        -INF          -36.0000          .          
+
+---- EQU pumpriver  pump limited by river flow
+
+          LOWER          LEVEL          UPPER
+
+y1        -INF          360.0000       360.0000      
+y2        -INF          360.0000       360.0000      
+
+                           LOWER          LEVEL          UPPER
+
+---- EQU onereserv~        -INF            1.0000         1.0000      
+
+  onereservoir  at most one reservoir
+
+---- VAR I  binary decision to build or do prject from source src (1=yes 0=no)
+
+          LOWER          LEVEL          UPPER
+
+rh          .             1.0000         1.0000      
+rl          .              .             1.0000      
+p           .             1.0000         1.0000      
+
+---- VAR X  volume of water provided by source src (ac-ft per year)
+
+             LOWER          LEVEL          UPPER
+
+rh.y1          .            20.0000        +INF         
+rh.y2          .           780.0000        +INF         
+rl.y1          .              .            +INF         
+rl.y2          .              .            +INF         
+p .y1          .           360.0000        +INF         
+p .y2          .           360.0000        +INF         
+
+                           LOWER          LEVEL          UPPER
+
+---- VAR AC                  .           380.0000        +INF         
+
+  AC  acre to be irrigated
+
+---- VAR Spill  water flow from reservoir to pump per season
+
+          LOWER          LEVEL          UPPER
+
+y1          .              .            +INF         
+y2          .              .            +INF         
+
+---- VAR S  carryover storage reservoir
+
+          LOWER          LEVEL          UPPER
+
+y1          .              .            +INF         
+y2          .           580.0000        +INF         
+
+                           LOWER          LEVEL          UPPER
+
+---- VAR TCOST             -INF        81600.0000        +INF         
+
+  TCOST  Maximum Benfiits-Cost ($)
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+
+
+EXECUTION TIME       =        0.094 SECONDS      4 MB  54.4.0 9a60ae27 DAX-DAC
+
+
+USER: Course License                                 G260818+0003Ac-GEN
+      Utah State University                                     DCE5615
+      License for teaching and research at degree granting institutions
+
+
+**** FILE SUMMARY
+
+Input      /Users/bashar/Desktop/GAMS/CEE_6410_Rosenberg/CEE-6410-Rosenberg/HW5.gms
+Output     /Users/bashar/Desktop/GAMS/CEE_6410_Rosenberg/CEE-6410-Rosenberg/HW5.lst

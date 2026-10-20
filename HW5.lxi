@@ -1,0 +1,36 @@
+B 3 C o m p i l a t i o n
+B 121 Equation Listing    SOLVE Irrig Using MIP From line 102
+D 124 COST
+D 129 massbal
+D 136 demand
+D 143 storcap
+D 150 relcap_h
+D 157 relcap_l
+D 164 pumpcap
+D 171 pumpriver
+D 178 onereservoir
+B 184 Column Listing      SOLVE Irrig Using MIP From line 102
+E 187 I
+E 214 X
+E 236 AC
+E 245 Spill
+E 258 S
+E 273 TCOST
+B 281 Range Statistics    SOLVE Irrig Using MIP From line 102
+B 292 Model Statistics    SOLVE Irrig Using MIP From line 102
+B 305 Solution Report     SOLVE Irrig Using MIP From line 102
+F 342 COST
+F 346 massbal
+F 353 demand
+F 360 storcap
+F 367 relcap_h
+F 374 relcap_l
+F 381 pumpcap
+F 388 pumpriver
+F 397 onereservoir
+G 401 I
+G 409 X
+G 422 AC
+G 426 Spill
+G 433 S
+G 442 TCOST
