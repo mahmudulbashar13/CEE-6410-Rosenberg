@@ -1,0 +1,23 @@
+B 3 C o m p i l a t i o n
+B 108 Equation Listing    SOLVE deployModel Using MIP From line 92
+D 111 obj
+D 116 cap
+D 127 dem
+B 137 Column Listing      SOLVE deployModel Using MIP From line 92
+E 140 deploy
+E 159 trips
+E 181 profit
+B 189 Range Statistics    SOLVE deployModel Using MIP From line 92
+B 200 Model Statistics    SOLVE deployModel Using MIP From line 92
+B 213 Solution Report     SOLVE deployModel Using MIP From line 92
+F 252 obj
+F 256 cap
+F 561 dem
+G 569 deploy
+G 874 trips
+G 1181 profit
+B 1189 E x e c u t i o n
+I 1191 profit
+I 1192 deployed
+I 1197 served
+I 1203 totalTrips

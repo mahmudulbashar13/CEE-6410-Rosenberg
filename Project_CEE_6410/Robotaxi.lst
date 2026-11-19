@@ -1,0 +1,1218 @@
+GAMS 54.7.0  8b4e16d1 Nov 9, 2026           WEX-WEI x86 64bit/MS Windows - 11/19/26 13:17:04 Page 1
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+C o m p i l a t i o n
+
+
+      CEE 6410 Fall 2020
+      Optimization of Charging and Operational Strategies for a Robotaxi Ride-Hailing Fleet
+       
+      Model Formulation:
+       
+      Assumptions
+          The project covers a small urban area. 
+          There is one zone with a limited number of chargers.
+          Time is split into 3-time windows: morning, afternoon and evening.
+          Demand is known in advance and differs in each window.
+          Deployed vehicles have an operational cost throughout the deployment (even in idle).
+          Charging also incurs a cost. 
+          Partial charging is allowed. A vehicle can charge up to the maximum capacity of the battery.
+          A full battery lasts an entire period. 
+          At the beginning of each window, a vehicle can have 4 statuses: charging, deployed but idle, on trip, or not deployed at all.
+          Trip durations are fixed. So, a vehicle on trips completes a maximum number of trips per window.
+          The revenue from each trip is fixed.
+       
+      Dimensions:
+      Time, Status [Not Deployed, Deployed Idle, Deployed Charging, Deployed in Trip], Vehicles
+       
+       
+      Decision Variables:
+          Status of each vehicle in each window: not deployed, deployed but idle, charging, or on trips (binary). A vehicle has exactly one status in each window.
+          How much to charge each vehicle in each window (continuous).
+          How many trips each vehicle serves in each window (whole number).
+          Battery level of each vehicle at the start of each window (continuous)
+      Constraints:
+          All deployed vehicles are assigned to one of the six zones at start. So each deployed vehicle from warehouse will go to one of the six zones.
+          ∑▒〖All deployed Taxis≤Maximum Capacity〗  of Taxis
+          Vehicle in trip + Vehicle charging + Vehicle not deployed + Vehicle deployed idle <= 1. So, a taxi can have only one status at each window.
+          For each taxi battery level at next window (t+1) =
+      Battery now(t) – trips within that window * battery drainage per trip + Charge added
+          Battery charging capacity <= Max Capacity of the battery.
+          A vehicle cannot start a trip if its charge is not enough to complete the whole trip. That includes, from pickup point, the whole trip duration to coming back at idling station.
+      For each taxi, trip begins if Battery level >= battery drainage per trip*Number of trips per window.
+          Only a maximum number of vehicles can be charging due to limited number of chargers. 
+      ∑▒〖Taxis charging≤Chargers〗
+          Trips are served only by a vehicle that is on trips, and no more than the maximum number of trips per window.
+          A vehicle cannot serve a trip if its charge is not enough to complete the whole trip, from the pickup point through the trip duration to coming back to the idling station. So, for each vehicle, battery now ≥ trips served × battery used per trip.
+          Trips cannot exceed demand in that window.
+           At the start of the morning window, all vehicle is at max battery capacity and all vehicles are deployed from warehouse.
+      Objective Function:
+      Max Profit = Profit from Trips – Charging Cost – Operational Cost (For each deployed vehicle)
+      Expected Results:
+      How many cars will be deployed, the total profit.
+       
+       
+      Programmed by David E. Rosenberg
+      October 26, 2015
+      Updated October 23, 2018
+      david.rosenberg@usu.edu
+  55   
+  56  *****************************************
+  57  ** PART I. Simpler Problem Ignoring Status Tracking of Each Vehicle
+  58  ********************************
+  59   
+  60  *1. Define the sets
+  61  SETS v  vehicles / v1*v100 /
+  62       t windows  / morning, afternoon, evening /;
+  63   
+  64  *2. Define th input data
+  65  Parameter demand(t) trips demand in each window / morning 200, afternoon 170, evening 240 /;
+  66   
+  67  Scalars
+  68     maxTrips max trips per vehicle per window          / 4  /
+  69     revenue  revenue per trip ($)                      / 50 /
+  70     opCost   operating cost per deployed vehicle per window ($) / 80 /;
+  71   
+  72   
+  73  *3. Define the decision variables
+  74  BINARY VARIABLES deploy(v,t);
+  75  INTEGER VARIABLES trips(v,t);
+  76  VARIABLE profit;
+  77  trips.UP(v,t) = maxTrips;
+  78   
+  79  *4. Define the equations
+  80  Equations
+  81      obj Revenue from trips - Operational costs
+  82      cap(v,t) A vehicle serves trips only if deployed and maximum trips in a window is limited to 4
+  83      dem(t)  The trips served in a window can not exceed demand;
+  84   
+  85   
+  86  obj..      profit =e= sum((v,t), revenue*trips(v,t) - opCost*deploy(v,t));
+  87  cap(v,t).. trips(v,t) =l= maxTrips*deploy(v,t);
+  88  dem(t)..   sum(v, trips(v,t)) =l= demand(t);
+  89   
+  90   
+  91  Model deployModel / all /;
+  92  Solve deployModel using mip maximizing profit;
+  93   
+  94  Parameter deployed(t), served(t);
+  95  Scalar totalTrips;
+  96  deployed(t) = sum(v, deploy.l(v,t));
+  97  served(t)   = sum(v, trips.l(v,t));
+  98  totalTrips  = sum(t, served(t));
+  99  display profit.l, deployed, served, totalTrips;
+
+
+COMPILATION TIME     =        0.000 SECONDS      3 MB  54.7.0 8b4e16d1 WEX-WEI
+GAMS 54.7.0  8b4e16d1 Nov 9, 2026           WEX-WEI x86 64bit/MS Windows - 11/19/26 13:17:04 Page 2
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Equation Listing    SOLVE deployModel Using MIP From line 92
+
+
+---- obj  =E=  Revenue from trips - Operational costs
+
+obj..  80*deploy(v1,morning) + 80*deploy(v1,afternoon) + 80*deploy(v1,evening) + 80*deploy(v2,morning) + 80*deploy(v2,afternoon) + 80*deploy(v2,evening) + 80*deploy(v3,morning) + 80*deploy(v3,afternoon) + 80*deploy(v3,evening) + 80*deploy(v4,morning) + 80*deploy(v4,afternoon) + 80*deploy(v4,evening) + 80*deploy(v5,morning) + 80*deploy(v5,afternoon) + 80*deploy(v5,evening) + 80*deploy(v6,morning) + 80*deploy(v6,afternoon) + 80*deploy(v6,evening) + 80*deploy(v7,morning) + 80*deploy(v7,afternoon) + 80*deploy(v7,evening) + 80*deploy(v8,morning) + 80*deploy(v8,afternoon) + 80*deploy(v8,evening) + 80*deploy(v9,morning) + 80*deploy(v9,afternoon) + 80*deploy(v9,evening) + 80*deploy(v10,morning) + 80*deploy(v10,afternoon) + 80*deploy(v10,evening) + 80*deploy(v11,morning) + 80*deploy(v11,afternoon) + 80*deploy(v11,evening) + 80*deploy(v12,morning) + 80*deploy(v12,afternoon) + 80*deploy(v12,evening) + 80*deploy(v13,morning) + 80*deploy(v13,afternoon) + 80*deploy(v13,evening) + 80*deploy(v14,morning) + 80*deploy(v14,afternoon) + 80*deploy(v14,evening) + 80*deploy(v15,morning) + 80*deploy(v15,afternoon) + 80*deploy(v15,evening) + 80*deploy(v16,morning) + 80*deploy(v16,afternoon) + 80*deploy(v16,evening) + 80*deploy(v17,morning) + 80*deploy(v17,afternoon) + 80*deploy(v17,evening) + 80*deploy(v18,morning) + 80*deploy(v18,afternoon) + 80*deploy(v18,evening) + 80*deploy(v19,morning) + 80*deploy(v19,afternoon) + 80*deploy(v19,evening) + 80*deploy(v20,morning) + 80*deploy(v20,afternoon) + 80*deploy(v20,evening) + 80*deploy(v21,morning) + 80*deploy(v21,afternoon) + 80*deploy(v21,evening) + 80*deploy(v22,morning) + 80*deploy(v22,afternoon) + 80*deploy(v22,evening) + 80*deploy(v23,morning) + 80*deploy(v23,afternoon) + 80*deploy(v23,evening) + 80*deploy(v24,morning) + 80*deploy(v24,afternoon) + 80*deploy(v24,evening) + 80*deploy(v25,morning) + 80*deploy(v25,afternoon) + 80*deploy(v25,evening) + 80*deploy(v26,morning) + 80*deploy(v26,afternoon) + 80*deploy(v26,evening) + 80*deploy(v27,morning) + 80*deploy(v27,afternoon) + 80*deploy(v27,evening) + 80*deploy(v28,morning) + 80*deploy(v28,afternoon) + 80*deploy(v28,evening) + 80*deploy(v29,morning) + 80*deploy(v29,afternoon) + 80*deploy(v29,evening) + 80*deploy(v30,morning) + 80*deploy(v30,afternoon) + 80*deploy(v30,evening) + 80*deploy(v31,morning) + 80*deploy(v31,afternoon) + 80*deploy(v31,evening) + 80*deploy(v32,morning) + 80*deploy(v32,afternoon) + 80*deploy(v32,evening) + 80*deploy(v33,morning) + 80*deploy(v33,afternoon) + 80*deploy(v33,evening) + 80*deploy(v34,morning) + 80*deploy(v34,afternoon) + 80*deploy(v34,evening) + 80*deploy(v35,morning) + 80*deploy(v35,afternoon) + 80*deploy(v35,evening) + 80*deploy(v36,morning) + 80*deploy(v36,afternoon) + 80*deploy(v36,evening) + 80*deploy(v37,morning) + 80*deploy(v37,afternoon) + 80*deploy(v37,evening) + 80*deploy(v38,morning) + 80*deploy(v38,afternoon) + 80*deploy(v38,evening) + 80*deploy(v39,morning) + 80*deploy(v39,afternoon) + 80*deploy(v39,evening) + 80*deploy(v40,morning) + 80*deploy(v40,afternoon) + 80*deploy(v40,evening) + 80*deploy(v41,morning) + 80*deploy(v41,afternoon) + 80*deploy(v41,evening) + 80*deploy(v42,morning) + 80*deploy(v42,afternoon) + 80*deploy(v42,evening) + 80*deploy(v43,morning) + 80*deploy(v43,afternoon) + 80*deploy(v43,evening) + 80*deploy(v44,morning) + 80*deploy(v44,afternoon) + 80*deploy(v44,evening) + 80*deploy(v45,morning) + 80*deploy(v45,afternoon) + 80*deploy(v45,evening) + 80*deploy(v46,morning) + 80*deploy(v46,afternoon) + 80*deploy(v46,evening) + 80*deploy(v47,morning) + 80*deploy(v47,afternoon) + 80*deploy(v47,evening) + 80*deploy(v48,morning) + 80*deploy(v48,afternoon) + 80*deploy(v48,evening) + 80*deploy(v49,morning) + 80*deploy(v49,afternoon) + 80*deploy(v49,evening) + 80*deploy(v50,morning) + 80*deploy(v50,afternoon) + 80*deploy(v50,evening) + 80*deploy(v51,morning) + 80*deploy(v51,afternoon) + 80*deploy(v51,evening) + 80*deploy(v52,morning) + 80*deploy(v52,afternoon) + 80*deploy(v52,evening) + 80*deploy(v53,morning) + 80*deploy(v53,afternoon) + 80*deploy(v53,evening) + 80*deploy(v54,morning) + 80*deploy(v54,afternoon) + 80*deploy(v54,evening) + 80*deploy(v55,morning) + 80*deploy(v55,afternoon) + 80*deploy(v55,evening) + 80*deploy(v56,morning) + 80*deploy(v56,afternoon) + 80*deploy(v56,evening) + 80*deploy(v57,morning) + 80*deploy(v57,afternoon) + 80*deploy(v57,evening) + 80*deploy(v58,morning) + 80*deploy(v58,afternoon) + 80*deploy(v58,evening) + 80*deploy(v59,morning) + 80*deploy(v59,afternoon) + 80*deploy(v59,evening) + 80*deploy(v60,morning) + 80*deploy(v60,afternoon) + 80*deploy(v60,evening) + 80*deploy(v61,morning) + 80*deploy(v61,afternoon) + 80*deploy(v61,evening) + 80*deploy(v62,morning) + 80*deploy(v62,afternoon) + 80*deploy(v62,evening) + 80*deploy(v63,morning) + 80*deploy(v63,afternoon) + 80*deploy(v63,evening) + 80*deploy(v64,morning) + 80*deploy(v64,afternoon) + 80*deploy(v64,evening) + 80*deploy(v65,morning) + 80*deploy(v65,afternoon) + 80*deploy(v65,evening) + 80*deploy(v66,morning) + 80*deploy(v66,afternoon) + 80*deploy(v66,evening) + 80*deploy(v67,morning) + 80*deploy(v67,afternoon) + 80*deploy(v67,evening) + 80*deploy(v68,morning) + 80*deploy(v68,afternoon) + 80*deploy(v68,evening) + 80*deploy(v69,morning) + 80*deploy(v69,afternoon) + 80*deploy(v69,evening) + 80*deploy(v70,morning) + 80*deploy(v70,afternoon) + 80*deploy(v70,evening) + 80*deploy(v71,morning) + 80*deploy(v71,afternoon) + 80*deploy(v71,evening) + 80*deploy(v72,morning) + 80*deploy(v72,afternoon) + 80*deploy(v72,evening) + 80*deploy(v73,morning) + 80*deploy(v73,afternoon) + 80*deploy(v73,evening) + 80*deploy(v74,morning) + 80*deploy(v74,afternoon) + 80*deploy(v74,evening) + 80*deploy(v75,morning) + 80*deploy(v75,afternoon) + 80*deploy(v75,evening) + 80*deploy(v76,morning) + 80*deploy(v76,afternoon) + 80*deploy(v76,evening) + 80*deploy(v77,morning) + 80*deploy(v77,afternoon) + 80*deploy(v77,evening) + 80*deploy(v78,morning) + 80*deploy(v78,afternoon) + 80*deploy(v78,evening) + 80*deploy(v79,morning) + 80*deploy(v79,afternoon) + 80*deploy(v79,evening) + 80*deploy(v80,morning) + 80*deploy(v80,afternoon) + 80*deploy(v80,evening) + 80*deploy(v81,morning) + 80*deploy(v81,afternoon) + 80*deploy(v81,evening) + 80*deploy(v82,morning) + 80*deploy(v82,afternoon) + 80*deploy(v82,evening) + 80*deploy(v83,morning) + 80*deploy(v83,afternoon) + 80*deploy(v83,evening) + 80*deploy(v84,morning) + 80*deploy(v84,afternoon) + 80*deploy(v84,evening) + 80*deploy(v85,morning) + 80*deploy(v85,afternoon) + 80*deploy(v85,evening) + 80*deploy(v86,morning) + 80*deploy(v86,afternoon) + 80*deploy(v86,evening) + 80*deploy(v87,morning) + 80*deploy(v87,afternoon) + 80*deploy(v87,evening) + 80*deploy(v88,morning) + 80*deploy(v88,afternoon) + 80*deploy(v88,evening) + 80*deploy(v89,morning) + 80*deploy(v89,afternoon) + 80*deploy(v89,evening) + 80*deploy(v90,morning) + 80*deploy(v90,afternoon) + 80*deploy(v90,evening) + 80*deploy(v91,morning) + 80*deploy(v91,afternoon) + 80*deploy(v91,evening) + 80*deploy(v92,morning) + 80*deploy(v92,afternoon) + 80*deploy(v92,evening) + 80*deploy(v93,morning) + 80*deploy(v93,afternoon) + 80*deploy(v93,evening) + 80*deploy(v94,morning) + 80*deploy(v94,afternoon) + 80*deploy(v94,evening) + 80*deploy(v95,morning) + 80*deploy(v95,afternoon) + 80*deploy(v95,evening) + 80*deploy(v96,morning) + 80*deploy(v96,afternoon) + 80*deploy(v96,evening) + 80*deploy(v97,morning) + 80*deploy(v97,afternoon) + 80*deploy(v97,evening) + 80*deploy(v98,morning) + 80*deploy(v98,afternoon) + 80*deploy(v98,evening) + 80*deploy(v99,morning) + 80*deploy(v99,afternoon) + 80*deploy(v99,evening) + 80*deploy(v100,morning) + 80*deploy(v100,afternoon) + 80*deploy(v100,evening) - 50*trips(v1,morning) - 50*trips(v1,afternoon) - 50*trips(v1,evening) - 50*trips(v2,morning) - 50*trips(v2,afternoon) - 50*trips(v2,evening) - 50*trips(v3,morning) - 50*trips(v3,afternoon) - 50*trips(v3,evening) - 50*trips(v4,morning) - 50*trips(v4,afternoon) - 50*trips(v4,evening) - 50*trips(v5,morning) - 50*trips(v5,afternoon) - 50*trips(v5,evening) - 50*trips(v6,morning) - 50*trips(v6,afternoon) - 50*trips(v6,evening) - 50*trips(v7,morning) - 50*trips(v7,afternoon) - 50*trips(v7,evening) - 50*trips(v8,morning) - 50*trips(v8,afternoon) - 50*trips(v8,evening) - 50*trips(v9,morning) - 50*trips(v9,afternoon) - 50*trips(v9,evening) - 50*trips(v10,morning) - 50*trips(v10,afternoon) - 50*trips(v10,evening) - 50*trips(v11,morning) - 50*trips(v11,afternoon) - 50*trips(v11,evening) - 50*trips(v12,morning) - 50*trips(v12,afternoon) - 50*trips(v12,evening) - 50*trips(v13,morning) - 50*trips(v13,afternoon) - 50*trips(v13,evening) - 50*trips(v14,morning) - 50*trips(v14,afternoon) - 50*trips(v14,evening) - 50*trips(v15,morning) - 50*trips(v15,afternoon) - 50*trips(v15,evening) - 50*trips(v16,morning) - 50*trips(v16,afternoon) - 50*trips(v16,evening) - 50*trips(v17,morning) - 50*trips(v17,afternoon) - 50*trips(v17,evening) - 50*trips(v18,morning) - 50*trips(v18,afternoon) - 50*trips(v18,evening) - 50*trips(v19,morning) - 50*trips(v19,afternoon) - 50*trips(v19,evening) - 50*trips(v20,morning) - 50*trips(v20,afternoon) - 50*trips(v20,evening) - 50*trips(v21,morning) - 50*trips(v21,afternoon) - 50*trips(v21,evening) - 50*trips(v22,morning) - 50*trips(v22,afternoon) - 50*trips(v22,evening) - 50*trips(v23,morning) - 50*trips(v23,afternoon) - 50*trips(v23,evening) - 50*trips(v24,morning) - 50*trips(v24,afternoon) - 50*trips(v24,evening) - 50*trips(v25,morning) - 50*trips(v25,afternoon) - 50*trips(v25,evening) - 50*trips(v26,morning) - 50*trips(v26,afternoon) - 50*trips(v26,evening) - 50*trips(v27,morning) - 50*trips(v27,afternoon) - 50*trips(v27,evening) - 50*trips(v28,morning) - 50*trips(v28,afternoon) - 50*trips(v28,evening) - 50*trips(v29,morning) - 50*trips(v29,afternoon) - 50*trips(v29,evening) - 50*trips(v30,morning) - 50*trips(v30,afternoon) - 50*trips(v30,evening) - 50*trips(v31,morning) - 50*trips(v31,afternoon) - 50*trips(v31,evening) - 50*trips(v32,morning) - 50*trips(v32,afternoon) - 50*trips(v32,evening) - 50*trips(v33,morning) - 50*trips(v33,afternoon) - 50*trips(v33,evening) - 50*trips(v34,morning) - 50*trips(v34,afternoon) - 50*trips(v34,evening) - 50*trips(v35,morning) - 50*trips(v35,afternoon) - 50*trips(v35,evening) - 50*trips(v36,morning) - 50*trips(v36,afternoon) - 50*trips(v36,evening) - 50*trips(v37,morning) - 50*trips(v37,afternoon) - 50*trips(v37,evening) - 50*trips(v38,morning) - 50*trips(v38,afternoon) - 50*trips(v38,evening) - 50*trips(v39,morning) - 50*trips(v39,afternoon) - 50*trips(v39,evening) - 50*trips(v40,morning) - 50*trips(v40,afternoon) - 50*trips(v40,evening) - 50*trips(v41,morning) - 50*trips(v41,afternoon) - 50*trips(v41,evening) - 50*trips(v42,morning) - 50*trips(v42,afternoon) - 50*trips(v42,evening) - 50*trips(v43,morning) - 50*trips(v43,afternoon) - 50*trips(v43,evening) - 50*trips(v44,morning) - 50*trips(v44,afternoon) - 50*trips(v44,evening) - 50*trips(v45,morning) - 50*trips(v45,afternoon) - 50*trips(v45,evening) - 50*trips(v46,morning) - 50*trips(v46,afternoon) - 50*trips(v46,evening) - 50*trips(v47,morning) - 50*trips(v47,afternoon) - 50*trips(v47,evening) - 50*trips(v48,morning) - 50*trips(v48,afternoon) - 50*trips(v48,evening) - 50*trips(v49,morning) - 50*trips(v49,afternoon) - 50*trips(v49,evening) - 50*trips(v50,morning) - 50*trips(v50,afternoon) - 50*trips(v50,evening) - 50*trips(v51,morning) - 50*trips(v51,afternoon) - 50*trips(v51,evening) - 50*trips(v52,morning) - 50*trips(v52,afternoon) - 50*trips(v52,evening) - 50*trips(v53,morning) - 50*trips(v53,afternoon) - 50*trips(v53,evening) - 50*trips(v54,morning) - 50*trips(v54,afternoon) - 50*trips(v54,evening) - 50*trips(v55,morning) - 50*trips(v55,afternoon) - 50*trips(v55,evening) - 50*trips(v56,morning) - 50*trips(v56,afternoon) - 50*trips(v56,evening) - 50*trips(v57,morning) - 50*trips(v57,afternoon) - 50*trips(v57,evening) - 50*trips(v58,morning) - 50*trips(v58,afternoon) - 50*trips(v58,evening) - 50*trips(v59,morning) - 50*trips(v59,afternoon) - 50*trips(v59,evening) - 50*trips(v60,morning) - 50*trips(v60,afternoon) - 50*trips(v60,evening) - 50*trips(v61,morning) - 50*trips(v61,afternoon) - 50*trips(v61,evening) - 50*trips(v62,morning) - 50*trips(v62,afternoon) - 50*trips(v62,evening) - 50*trips(v63,morning) - 50*trips(v63,afternoon) - 50*trips(v63,evening) - 50*trips(v64,morning) - 50*trips(v64,afternoon) - 50*trips(v64,evening) - 50*trips(v65,morning) - 50*trips(v65,afternoon) - 50*trips(v65,evening) - 50*trips(v66,morning) - 50*trips(v66,afternoon) - 50*trips(v66,evening) - 50*trips(v67,morning) - 50*trips(v67,afternoon) - 50*trips(v67,evening) - 50*trips(v68,morning) - 50*trips(v68,afternoon) - 50*trips(v68,evening) - 50*trips(v69,morning) - 50*trips(v69,afternoon) - 50*trips(v69,evening) - 50*trips(v70,morning) - 50*trips(v70,afternoon) - 50*trips(v70,evening) - 50*trips(v71,morning) - 50*trips(v71,afternoon) - 50*trips(v71,evening) - 50*trips(v72,morning) - 50*trips(v72,afternoon) - 50*trips(v72,evening) - 50*trips(v73,morning) - 50*trips(v73,afternoon) - 50*trips(v73,evening) - 50*trips(v74,morning) - 50*trips(v74,afternoon) - 50*trips(v74,evening) - 50*trips(v75,morning) - 50*trips(v75,afternoon) - 50*trips(v75,evening) - 50*trips(v76,morning) - 50*trips(v76,afternoon) - 50*trips(v76,evening) - 50*trips(v77,morning) - 50*trips(v77,afternoon) - 50*trips(v77,evening) - 50*trips(v78,morning) - 50*trips(v78,afternoon) - 50*trips(v78,evening) - 50*trips(v79,morning) - 50*trips(v79,afternoon) - 50*trips(v79,evening) - 50*trips(v80,morning) - 50*trips(v80,afternoon) - 50*trips(v80,evening) - 50*trips(v81,morning) - 50*trips(v81,afternoon) - 50*trips(v81,evening) - 50*trips(v82,morning) - 50*trips(v82,afternoon) - 50*trips(v82,evening) - 50*trips(v83,morning) - 50*trips(v83,afternoon) - 50*trips(v83,evening) - 50*trips(v84,morning) - 50*trips(v84,afternoon) - 50*trips(v84,evening) - 50*trips(v85,morning) - 50*trips(v85,afternoon) - 50*trips(v85,evening) - 50*trips(v86,morning) - 50*trips(v86,afternoon) - 50*trips(v86,evening) - 50*trips(v87,morning) - 50*trips(v87,afternoon) - 50*trips(v87,evening) - 50*trips(v88,morning) - 50*trips(v88,afternoon) - 50*trips(v88,evening) - 50*trips(v89,morning) - 50*trips(v89,afternoon) - 50*trips(v89,evening) - 50*trips(v90,morning) - 50*trips(v90,afternoon) - 50*trips(v90,evening) - 50*trips(v91,morning) - 50*trips(v91,afternoon) - 50*trips(v91,evening) - 50*trips(v92,morning) - 50*trips(v92,afternoon) - 50*trips(v92,evening) - 50*trips(v93,morning) - 50*trips(v93,afternoon) - 50*trips(v93,evening) - 50*trips(v94,morning) - 50*trips(v94,afternoon) - 50*trips(v94,evening) - 50*trips(v95,morning) - 50*trips(v95,afternoon) - 50*trips(v95,evening) - 50*trips(v96,morning) - 50*trips(v96,afternoon) - 50*trips(v96,evening) - 50*trips(v97,morning) - 50*trips(v97,afternoon) - 50*trips(v97,evening) - 50*trips(v98,morning) - 50*trips(v98,afternoon) - 50*trips(v98,evening) - 50*trips(v99,morning) - 50*trips(v99,afternoon) - 50*trips(v99,evening) - 50*trips(v100,morning) - 50*trips(v100,afternoon) - 50*trips(v100,evening) + profit =E= 0 ; (LHS = 0)
+     
+
+---- cap  =L=  A vehicle serves trips only if deployed and maximum trips in a window is limited to 4
+
+cap(v1,morning)..  - 4*deploy(v1,morning) + trips(v1,morning) =L= 0 ; (LHS = 0)
+     
+cap(v1,afternoon)..  - 4*deploy(v1,afternoon) + trips(v1,afternoon) =L= 0 ; (LHS = 0)
+     
+cap(v1,evening)..  - 4*deploy(v1,evening) + trips(v1,evening) =L= 0 ; (LHS = 0)
+     
+REMAINING 297 ENTRIES SKIPPED
+
+
+---- dem  =L=  The trips served in a window can not exceed demand
+
+dem(morning)..  trips(v1,morning) + trips(v2,morning) + trips(v3,morning) + trips(v4,morning) + trips(v5,morning) + trips(v6,morning) + trips(v7,morning) + trips(v8,morning) + trips(v9,morning) + trips(v10,morning) + trips(v11,morning) + trips(v12,morning) + trips(v13,morning) + trips(v14,morning) + trips(v15,morning) + trips(v16,morning) + trips(v17,morning) + trips(v18,morning) + trips(v19,morning) + trips(v20,morning) + trips(v21,morning) + trips(v22,morning) + trips(v23,morning) + trips(v24,morning) + trips(v25,morning) + trips(v26,morning) + trips(v27,morning) + trips(v28,morning) + trips(v29,morning) + trips(v30,morning) + trips(v31,morning) + trips(v32,morning) + trips(v33,morning) + trips(v34,morning) + trips(v35,morning) + trips(v36,morning) + trips(v37,morning) + trips(v38,morning) + trips(v39,morning) + trips(v40,morning) + trips(v41,morning) + trips(v42,morning) + trips(v43,morning) + trips(v44,morning) + trips(v45,morning) + trips(v46,morning) + trips(v47,morning) + trips(v48,morning) + trips(v49,morning) + trips(v50,morning) + trips(v51,morning) + trips(v52,morning) + trips(v53,morning) + trips(v54,morning) + trips(v55,morning) + trips(v56,morning) + trips(v57,morning) + trips(v58,morning) + trips(v59,morning) + trips(v60,morning) + trips(v61,morning) + trips(v62,morning) + trips(v63,morning) + trips(v64,morning) + trips(v65,morning) + trips(v66,morning) + trips(v67,morning) + trips(v68,morning) + trips(v69,morning) + trips(v70,morning) + trips(v71,morning) + trips(v72,morning) + trips(v73,morning) + trips(v74,morning) + trips(v75,morning) + trips(v76,morning) + trips(v77,morning) + trips(v78,morning) + trips(v79,morning) + trips(v80,morning) + trips(v81,morning) + trips(v82,morning) + trips(v83,morning) + trips(v84,morning) + trips(v85,morning) + trips(v86,morning) + trips(v87,morning) + trips(v88,morning) + trips(v89,morning) + trips(v90,morning) + trips(v91,morning) + trips(v92,morning) + trips(v93,morning) + trips(v94,morning) + trips(v95,morning) + trips(v96,morning) + trips(v97,morning) + trips(v98,morning) + trips(v99,morning) + trips(v100,morning) =L= 200 ; (LHS = 0)
+     
+dem(afternoon)..  trips(v1,afternoon) + trips(v2,afternoon) + trips(v3,afternoon) + trips(v4,afternoon) + trips(v5,afternoon) + trips(v6,afternoon) + trips(v7,afternoon) + trips(v8,afternoon) + trips(v9,afternoon) + trips(v10,afternoon) + trips(v11,afternoon) + trips(v12,afternoon) + trips(v13,afternoon) + trips(v14,afternoon) + trips(v15,afternoon) + trips(v16,afternoon) + trips(v17,afternoon) + trips(v18,afternoon) + trips(v19,afternoon) + trips(v20,afternoon) + trips(v21,afternoon) + trips(v22,afternoon) + trips(v23,afternoon) + trips(v24,afternoon) + trips(v25,afternoon) + trips(v26,afternoon) + trips(v27,afternoon) + trips(v28,afternoon) + trips(v29,afternoon) + trips(v30,afternoon) + trips(v31,afternoon) + trips(v32,afternoon) + trips(v33,afternoon) + trips(v34,afternoon) + trips(v35,afternoon) + trips(v36,afternoon) + trips(v37,afternoon) + trips(v38,afternoon) + trips(v39,afternoon) + trips(v40,afternoon) + trips(v41,afternoon) + trips(v42,afternoon) + trips(v43,afternoon) + trips(v44,afternoon) + trips(v45,afternoon) + trips(v46,afternoon) + trips(v47,afternoon) + trips(v48,afternoon) + trips(v49,afternoon) + trips(v50,afternoon) + trips(v51,afternoon) + trips(v52,afternoon) + trips(v53,afternoon) + trips(v54,afternoon) + trips(v55,afternoon) + trips(v56,afternoon) + trips(v57,afternoon) + trips(v58,afternoon) + trips(v59,afternoon) + trips(v60,afternoon) + trips(v61,afternoon) + trips(v62,afternoon) + trips(v63,afternoon) + trips(v64,afternoon) + trips(v65,afternoon) + trips(v66,afternoon) + trips(v67,afternoon) + trips(v68,afternoon) + trips(v69,afternoon) + trips(v70,afternoon) + trips(v71,afternoon) + trips(v72,afternoon) + trips(v73,afternoon) + trips(v74,afternoon) + trips(v75,afternoon) + trips(v76,afternoon) + trips(v77,afternoon) + trips(v78,afternoon) + trips(v79,afternoon) + trips(v80,afternoon) + trips(v81,afternoon) + trips(v82,afternoon) + trips(v83,afternoon) + trips(v84,afternoon) + trips(v85,afternoon) + trips(v86,afternoon) + trips(v87,afternoon) + trips(v88,afternoon) + trips(v89,afternoon) + trips(v90,afternoon) + trips(v91,afternoon) + trips(v92,afternoon) + trips(v93,afternoon) + trips(v94,afternoon) + trips(v95,afternoon) + trips(v96,afternoon) + trips(v97,afternoon) + trips(v98,afternoon) + trips(v99,afternoon) + trips(v100,afternoon) =L= 170 ; (LHS = 0)
+     
+dem(evening)..  trips(v1,evening) + trips(v2,evening) + trips(v3,evening) + trips(v4,evening) + trips(v5,evening) + trips(v6,evening) + trips(v7,evening) + trips(v8,evening) + trips(v9,evening) + trips(v10,evening) + trips(v11,evening) + trips(v12,evening) + trips(v13,evening) + trips(v14,evening) + trips(v15,evening) + trips(v16,evening) + trips(v17,evening) + trips(v18,evening) + trips(v19,evening) + trips(v20,evening) + trips(v21,evening) + trips(v22,evening) + trips(v23,evening) + trips(v24,evening) + trips(v25,evening) + trips(v26,evening) + trips(v27,evening) + trips(v28,evening) + trips(v29,evening) + trips(v30,evening) + trips(v31,evening) + trips(v32,evening) + trips(v33,evening) + trips(v34,evening) + trips(v35,evening) + trips(v36,evening) + trips(v37,evening) + trips(v38,evening) + trips(v39,evening) + trips(v40,evening) + trips(v41,evening) + trips(v42,evening) + trips(v43,evening) + trips(v44,evening) + trips(v45,evening) + trips(v46,evening) + trips(v47,evening) + trips(v48,evening) + trips(v49,evening) + trips(v50,evening) + trips(v51,evening) + trips(v52,evening) + trips(v53,evening) + trips(v54,evening) + trips(v55,evening) + trips(v56,evening) + trips(v57,evening) + trips(v58,evening) + trips(v59,evening) + trips(v60,evening) + trips(v61,evening) + trips(v62,evening) + trips(v63,evening) + trips(v64,evening) + trips(v65,evening) + trips(v66,evening) + trips(v67,evening) + trips(v68,evening) + trips(v69,evening) + trips(v70,evening) + trips(v71,evening) + trips(v72,evening) + trips(v73,evening) + trips(v74,evening) + trips(v75,evening) + trips(v76,evening) + trips(v77,evening) + trips(v78,evening) + trips(v79,evening) + trips(v80,evening) + trips(v81,evening) + trips(v82,evening) + trips(v83,evening) + trips(v84,evening) + trips(v85,evening) + trips(v86,evening) + trips(v87,evening) + trips(v88,evening) + trips(v89,evening) + trips(v90,evening) + trips(v91,evening) + trips(v92,evening) + trips(v93,evening) + trips(v94,evening) + trips(v95,evening) + trips(v96,evening) + trips(v97,evening) + trips(v98,evening) + trips(v99,evening) + trips(v100,evening) =L= 240 ; (LHS = 0)
+     
+GAMS 54.7.0  8b4e16d1 Nov 9, 2026           WEX-WEI x86 64bit/MS Windows - 11/19/26 13:17:04 Page 3
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Column Listing      SOLVE deployModel Using MIP From line 92
+
+
+---- deploy  
+
+deploy(v1,morning)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+       80       obj
+       -4       cap(v1,morning)
+
+deploy(v1,afternoon)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+       80       obj
+       -4       cap(v1,afternoon)
+
+deploy(v1,evening)
+                (.LO, .L, .UP, .M = 0, 0, 1, 0)
+       80       obj
+       -4       cap(v1,evening)
+
+REMAINING 297 ENTRIES SKIPPED
+
+---- trips  
+
+trips(v1,morning)
+                (.LO, .L, .UP, .M = 0, 0, 4, 0)
+      -50       obj
+        1       cap(v1,morning)
+        1       dem(morning)
+
+trips(v1,afternoon)
+                (.LO, .L, .UP, .M = 0, 0, 4, 0)
+      -50       obj
+        1       cap(v1,afternoon)
+        1       dem(afternoon)
+
+trips(v1,evening)
+                (.LO, .L, .UP, .M = 0, 0, 4, 0)
+      -50       obj
+        1       cap(v1,evening)
+        1       dem(evening)
+
+REMAINING 297 ENTRIES SKIPPED
+
+---- profit  
+
+profit
+                (.LO, .L, .UP, .M = -INF, 0, +INF, 0)
+        1       obj
+
+GAMS 54.7.0  8b4e16d1 Nov 9, 2026           WEX-WEI x86 64bit/MS Windows - 11/19/26 13:17:04 Page 4
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Range Statistics    SOLVE deployModel Using MIP From line 92
+
+
+RANGE STATISTICS (ABSOLUTE NON-ZERO FINITE VALUES)
+
+RHS       [min, max] : [ 1.700E+02, 2.400E+02] - Zero values observed as well
+Bound     [min, max] : [ 1.000E+00, 4.000E+00] - Zero values observed as well
+Matrix    [min, max] : [ 1.000E+00, 8.000E+01]
+
+GAMS 54.7.0  8b4e16d1 Nov 9, 2026           WEX-WEI x86 64bit/MS Windows - 11/19/26 13:17:04 Page 5
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Model Statistics    SOLVE deployModel Using MIP From line 92
+
+
+MODEL STATISTICS
+
+BLOCKS OF EQUATIONS           3     SINGLE EQUATIONS          304
+BLOCKS OF VARIABLES           3     SINGLE VARIABLES          601
+NON ZERO ELEMENTS         1,501     DISCRETE VARIABLES        600
+
+
+GENERATION TIME      =        0.016 SECONDS      4 MB  54.7.0 8b4e16d1 WEX-WEI
+GAMS 54.7.0  8b4e16d1 Nov 9, 2026           WEX-WEI x86 64bit/MS Windows - 11/19/26 13:17:04 Page 6
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+Solution Report     SOLVE deployModel Using MIP From line 92
+
+
+               S O L V E      S U M M A R Y
+
+     MODEL   deployModel         OBJECTIVE  profit
+     TYPE    MIP                 DIRECTION  MAXIMIZE
+     SOLVER  CPLEX               FROM LINE  92
+
+**** SOLVER STATUS     1 Normal Completion
+**** MODEL STATUS      1 Optimal
+**** OBJECTIVE VALUE            18260.0000
+
+ RESOURCE USAGE, LIMIT          0.891 10000000000.000
+ ITERATION COUNT, LIMIT        87    2147483647
+*** This solver runs with a community license.
+--- GMO setup time: 0.00s
+--- Space for names approximately 0.02 Mb
+--- Use option 'names no' to turn use of names off
+--- GMO memory 0.60 Mb (peak 0.61 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 22.2.0.1 link memory 0.01 Mb (peak 0.06 Mb)
+--- Starting Cplex
+
+
+--- MIP status (101): integer optimal solution.
+--- Cplex Time: 0.89sec (det. 211.88 ticks)
+
+
+Proven optimal solution
+MIP Solution:        18260.000000    (87 iterations, 86 nodes)
+
+Best possible:       18260.000000
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+
+                           LOWER          LEVEL          UPPER
+
+---- EQU obj                 .              .              .          
+
+  obj  Revenue from trips - Operational costs
+
+---- EQU cap  A vehicle serves trips only if deployed and maximum trips in a window is limited to 4
+
+                      LOWER          LEVEL          UPPER
+
+v1  .morning          -INF             .              .          
+v1  .afternoon        -INF             .              .          
+v1  .evening          -INF             .              .          
+v2  .morning          -INF             .              .          
+v2  .afternoon        -INF             .              .          
+v2  .evening          -INF             .              .          
+v3  .morning          -INF             .              .          
+v3  .afternoon        -INF             .              .          
+v3  .evening          -INF             .              .          
+v4  .morning          -INF             .              .          
+v4  .afternoon        -INF             .              .          
+v4  .evening          -INF             .              .          
+v5  .morning          -INF             .              .          
+v5  .afternoon        -INF             .              .          
+v5  .evening          -INF             .              .          
+v6  .morning          -INF             .              .          
+v6  .afternoon        -INF             .              .          
+v6  .evening          -INF             .              .          
+v7  .morning          -INF             .              .          
+v7  .afternoon        -INF             .              .          
+v7  .evening          -INF             .              .          
+v8  .morning          -INF             .              .          
+v8  .afternoon        -INF             .              .          
+v8  .evening          -INF             .              .          
+v9  .morning          -INF             .              .          
+v9  .afternoon        -INF             .              .          
+v9  .evening          -INF             .              .          
+v10 .morning          -INF             .              .          
+v10 .afternoon        -INF             .              .          
+v10 .evening          -INF             .              .          
+v11 .morning          -INF             .              .          
+v11 .afternoon        -INF             .              .          
+v11 .evening          -INF             .              .          
+v12 .morning          -INF             .              .          
+v12 .afternoon        -INF             .              .          
+v12 .evening          -INF             .              .          
+v13 .morning          -INF             .              .          
+v13 .afternoon        -INF             .              .          
+v13 .evening          -INF             .              .          
+v14 .morning          -INF             .              .          
+v14 .afternoon        -INF             .              .          
+v14 .evening          -INF             .              .          
+v15 .morning          -INF             .              .          
+v15 .afternoon        -INF             .              .          
+v15 .evening          -INF             .              .          
+v16 .morning          -INF             .              .          
+v16 .afternoon        -INF             .              .          
+v16 .evening          -INF             .              .          
+v17 .morning          -INF             .              .          
+v17 .afternoon        -INF             .              .          
+v17 .evening          -INF             .              .          
+v18 .morning          -INF             .              .          
+v18 .afternoon        -INF             .              .          
+v18 .evening          -INF             .              .          
+v19 .morning          -INF             .              .          
+v19 .afternoon        -INF             .              .          
+v19 .evening          -INF             .              .          
+v20 .morning          -INF             .              .          
+v20 .afternoon        -INF             .              .          
+v20 .evening          -INF             .              .          
+v21 .morning          -INF             .              .          
+v21 .afternoon        -INF             .              .          
+v21 .evening          -INF             .              .          
+v22 .morning          -INF             .              .          
+v22 .afternoon        -INF             .              .          
+v22 .evening          -INF             .              .          
+v23 .morning          -INF             .              .          
+v23 .afternoon        -INF             .              .          
+v23 .evening          -INF             .              .          
+v24 .morning          -INF             .              .          
+v24 .afternoon        -INF             .              .          
+v24 .evening          -INF             .              .          
+v25 .morning          -INF             .              .          
+v25 .afternoon        -INF             .              .          
+v25 .evening          -INF             .              .          
+v26 .morning          -INF             .              .          
+v26 .afternoon        -INF             .              .          
+v26 .evening          -INF             .              .          
+v27 .morning          -INF             .              .          
+v27 .afternoon        -INF             .              .          
+v27 .evening          -INF             .              .          
+v28 .morning          -INF             .              .          
+v28 .afternoon        -INF             .              .          
+v28 .evening          -INF             .              .          
+v29 .morning          -INF             .              .          
+v29 .afternoon        -INF             .              .          
+v29 .evening          -INF             .              .          
+v30 .morning          -INF             .              .          
+v30 .afternoon        -INF             .              .          
+v30 .evening          -INF             .              .          
+v31 .morning          -INF             .              .          
+v31 .afternoon        -INF             .              .          
+v31 .evening          -INF             .              .          
+v32 .morning          -INF             .              .          
+v32 .afternoon        -INF             .              .          
+v32 .evening          -INF             .              .          
+v33 .morning          -INF             .              .          
+v33 .afternoon        -INF             .              .          
+v33 .evening          -INF             .              .          
+v34 .morning          -INF             .              .          
+v34 .afternoon        -INF             .              .          
+v34 .evening          -INF             .              .          
+v35 .morning          -INF             .              .          
+v35 .afternoon        -INF             .              .          
+v35 .evening          -INF             .              .          
+v36 .morning          -INF             .              .          
+v36 .afternoon        -INF             .              .          
+v36 .evening          -INF             .              .          
+v37 .morning          -INF             .              .          
+v37 .afternoon        -INF             .              .          
+v37 .evening          -INF             .              .          
+v38 .morning          -INF             .              .          
+v38 .afternoon        -INF             .              .          
+v38 .evening          -INF             .              .          
+v39 .morning          -INF             .              .          
+v39 .afternoon        -INF             .              .          
+v39 .evening          -INF             .              .          
+v40 .morning          -INF             .              .          
+v40 .afternoon        -INF             .              .          
+v40 .evening          -INF             .              .          
+v41 .morning          -INF             .              .          
+v41 .afternoon        -INF             .              .          
+v41 .evening          -INF             .              .          
+v42 .morning          -INF             .              .          
+v42 .afternoon        -INF             .              .          
+v42 .evening          -INF             .              .          
+v43 .morning          -INF             .              .          
+v43 .afternoon        -INF             .              .          
+v43 .evening          -INF             .              .          
+v44 .morning          -INF             .              .          
+v44 .afternoon        -INF             .              .          
+v44 .evening          -INF             .              .          
+v45 .morning          -INF             .              .          
+v45 .afternoon        -INF             .              .          
+v45 .evening          -INF             .              .          
+v46 .morning          -INF             .              .          
+v46 .afternoon        -INF             .              .          
+v46 .evening          -INF             .              .          
+v47 .morning          -INF             .              .          
+v47 .afternoon        -INF             .              .          
+v47 .evening          -INF             .              .          
+v48 .morning          -INF             .              .          
+v48 .afternoon        -INF           -2.0000          .          
+v48 .evening          -INF             .              .          
+v49 .morning          -INF             .              .          
+v49 .afternoon        -INF             .              .          
+v49 .evening          -INF             .              .          
+v50 .morning          -INF             .              .          
+v50 .afternoon        -INF             .              .          
+v50 .evening          -INF             .              .          
+v51 .morning          -INF             .              .          
+v51 .afternoon        -INF             .              .          
+v51 .evening          -INF             .              .          
+v52 .morning          -INF             .              .          
+v52 .afternoon        -INF             .              .          
+v52 .evening          -INF             .              .          
+v53 .morning          -INF             .              .          
+v53 .afternoon        -INF             .              .          
+v53 .evening          -INF             .              .          
+v54 .morning          -INF             .              .          
+v54 .afternoon        -INF             .              .          
+v54 .evening          -INF             .              .          
+v55 .morning          -INF             .              .          
+v55 .afternoon        -INF             .              .          
+v55 .evening          -INF             .              .          
+v56 .morning          -INF             .              .          
+v56 .afternoon        -INF             .              .          
+v56 .evening          -INF             .              .          
+v57 .morning          -INF             .              .          
+v57 .afternoon        -INF             .              .          
+v57 .evening          -INF             .              .          
+v58 .morning          -INF             .              .          
+v58 .afternoon        -INF             .              .          
+v58 .evening          -INF             .              .          
+v59 .morning          -INF             .              .          
+v59 .afternoon        -INF             .              .          
+v59 .evening          -INF             .              .          
+v60 .morning          -INF             .              .          
+v60 .afternoon        -INF             .              .          
+v60 .evening          -INF             .              .          
+v61 .morning          -INF             .              .          
+v61 .afternoon        -INF             .              .          
+v61 .evening          -INF             .              .          
+v62 .morning          -INF             .              .          
+v62 .afternoon        -INF             .              .          
+v62 .evening          -INF             .              .          
+v63 .morning          -INF             .              .          
+v63 .afternoon        -INF             .              .          
+v63 .evening          -INF             .              .          
+v64 .morning          -INF             .              .          
+v64 .afternoon        -INF             .              .          
+v64 .evening          -INF             .              .          
+v65 .morning          -INF             .              .          
+v65 .afternoon        -INF             .              .          
+v65 .evening          -INF             .              .          
+v66 .morning          -INF             .              .          
+v66 .afternoon        -INF             .              .          
+v66 .evening          -INF             .              .          
+v67 .morning          -INF             .              .          
+v67 .afternoon        -INF             .              .          
+v67 .evening          -INF             .              .          
+v68 .morning          -INF             .              .          
+v68 .afternoon        -INF             .              .          
+v68 .evening          -INF             .              .          
+v69 .morning          -INF             .              .          
+v69 .afternoon        -INF             .              .          
+v69 .evening          -INF             .              .          
+v70 .morning          -INF             .              .          
+v70 .afternoon        -INF             .              .          
+v70 .evening          -INF             .              .          
+v71 .morning          -INF             .              .          
+v71 .afternoon        -INF             .              .          
+v71 .evening          -INF             .              .          
+v72 .morning          -INF             .              .          
+v72 .afternoon        -INF             .              .          
+v72 .evening          -INF             .              .          
+v73 .morning          -INF             .              .          
+v73 .afternoon        -INF             .              .          
+v73 .evening          -INF             .              .          
+v74 .morning          -INF             .              .          
+v74 .afternoon        -INF             .              .          
+v74 .evening          -INF             .              .          
+v75 .morning          -INF             .              .          
+v75 .afternoon        -INF             .              .          
+v75 .evening          -INF             .              .          
+v76 .morning          -INF             .              .          
+v76 .afternoon        -INF             .              .          
+v76 .evening          -INF             .              .          
+v77 .morning          -INF             .              .          
+v77 .afternoon        -INF             .              .          
+v77 .evening          -INF             .              .          
+v78 .morning          -INF             .              .          
+v78 .afternoon        -INF             .              .          
+v78 .evening          -INF             .              .          
+v79 .morning          -INF             .              .          
+v79 .afternoon        -INF             .              .          
+v79 .evening          -INF             .              .          
+v80 .morning          -INF             .              .          
+v80 .afternoon        -INF             .              .          
+v80 .evening          -INF             .              .          
+v81 .morning          -INF             .              .          
+v81 .afternoon        -INF             .              .          
+v81 .evening          -INF             .              .          
+v82 .morning          -INF             .              .          
+v82 .afternoon        -INF             .              .          
+v82 .evening          -INF             .              .          
+v83 .morning          -INF             .              .          
+v83 .afternoon        -INF             .              .          
+v83 .evening          -INF             .              .          
+v84 .morning          -INF             .              .          
+v84 .afternoon        -INF             .              .          
+v84 .evening          -INF             .              .          
+v85 .morning          -INF             .              .          
+v85 .afternoon        -INF             .              .          
+v85 .evening          -INF             .              .          
+v86 .morning          -INF             .              .          
+v86 .afternoon        -INF             .              .          
+v86 .evening          -INF             .              .          
+v87 .morning          -INF             .              .          
+v87 .afternoon        -INF             .              .          
+v87 .evening          -INF             .              .          
+v88 .morning          -INF             .              .          
+v88 .afternoon        -INF             .              .          
+v88 .evening          -INF             .              .          
+v89 .morning          -INF             .              .          
+v89 .afternoon        -INF             .              .          
+v89 .evening          -INF             .              .          
+v90 .morning          -INF             .              .          
+v90 .afternoon        -INF             .              .          
+v90 .evening          -INF             .              .          
+v91 .morning          -INF             .              .          
+v91 .afternoon        -INF             .              .          
+v91 .evening          -INF             .              .          
+v92 .morning          -INF             .              .          
+v92 .afternoon        -INF             .              .          
+v92 .evening          -INF             .              .          
+v93 .morning          -INF             .              .          
+v93 .afternoon        -INF             .              .          
+v93 .evening          -INF             .              .          
+v94 .morning          -INF             .              .          
+v94 .afternoon        -INF             .              .          
+v94 .evening          -INF             .              .          
+v95 .morning          -INF             .              .          
+v95 .afternoon        -INF             .              .          
+v95 .evening          -INF             .              .          
+v96 .morning          -INF             .              .          
+v96 .afternoon        -INF             .              .          
+v96 .evening          -INF             .              .          
+v97 .morning          -INF             .              .          
+v97 .afternoon        -INF             .              .          
+v97 .evening          -INF             .              .          
+v98 .morning          -INF             .              .          
+v98 .afternoon        -INF             .              .          
+v98 .evening          -INF             .              .          
+v99 .morning          -INF             .              .          
+v99 .afternoon        -INF             .              .          
+v99 .evening          -INF             .              .          
+v100.morning          -INF             .              .          
+v100.afternoon        -INF             .              .          
+v100.evening          -INF             .              .          
+
+---- EQU dem  The trips served in a window can not exceed demand
+
+                 LOWER          LEVEL          UPPER
+
+morning          -INF          200.0000       200.0000      
+afternoon        -INF          170.0000       170.0000      
+evening          -INF          240.0000       240.0000      
+
+---- VAR deploy  
+
+                      LOWER          LEVEL          UPPER
+
+v1  .morning            .             1.0000         1.0000      
+v1  .afternoon          .             1.0000         1.0000      
+v1  .evening            .             1.0000         1.0000      
+v2  .morning            .             1.0000         1.0000      
+v2  .afternoon          .             1.0000         1.0000      
+v2  .evening            .             1.0000         1.0000      
+v3  .morning            .             1.0000         1.0000      
+v3  .afternoon          .             1.0000         1.0000      
+v3  .evening            .             1.0000         1.0000      
+v4  .morning            .             1.0000         1.0000      
+v4  .afternoon          .             1.0000         1.0000      
+v4  .evening            .             1.0000         1.0000      
+v5  .morning            .             1.0000         1.0000      
+v5  .afternoon          .             1.0000         1.0000      
+v5  .evening            .             1.0000         1.0000      
+v6  .morning            .             1.0000         1.0000      
+v6  .afternoon          .             1.0000         1.0000      
+v6  .evening            .             1.0000         1.0000      
+v7  .morning            .             1.0000         1.0000      
+v7  .afternoon          .             1.0000         1.0000      
+v7  .evening            .             1.0000         1.0000      
+v8  .morning            .             1.0000         1.0000      
+v8  .afternoon          .             1.0000         1.0000      
+v8  .evening            .             1.0000         1.0000      
+v9  .morning            .             1.0000         1.0000      
+v9  .afternoon          .             1.0000         1.0000      
+v9  .evening            .             1.0000         1.0000      
+v10 .morning            .             1.0000         1.0000      
+v10 .afternoon          .             1.0000         1.0000      
+v10 .evening            .             1.0000         1.0000      
+v11 .morning            .             1.0000         1.0000      
+v11 .afternoon          .             1.0000         1.0000      
+v11 .evening            .             1.0000         1.0000      
+v12 .morning            .             1.0000         1.0000      
+v12 .afternoon          .             1.0000         1.0000      
+v12 .evening            .             1.0000         1.0000      
+v13 .morning            .             1.0000         1.0000      
+v13 .afternoon          .             1.0000         1.0000      
+v13 .evening            .             1.0000         1.0000      
+v14 .morning            .             1.0000         1.0000      
+v14 .afternoon          .             1.0000         1.0000      
+v14 .evening            .             1.0000         1.0000      
+v15 .morning            .             1.0000         1.0000      
+v15 .afternoon          .             1.0000         1.0000      
+v15 .evening            .             1.0000         1.0000      
+v16 .morning            .             1.0000         1.0000      
+v16 .afternoon          .             1.0000         1.0000      
+v16 .evening            .             1.0000         1.0000      
+v17 .morning            .             1.0000         1.0000      
+v17 .afternoon          .             1.0000         1.0000      
+v17 .evening            .             1.0000         1.0000      
+v18 .morning            .             1.0000         1.0000      
+v18 .afternoon          .             1.0000         1.0000      
+v18 .evening            .             1.0000         1.0000      
+v19 .morning            .             1.0000         1.0000      
+v19 .afternoon          .             1.0000         1.0000      
+v19 .evening            .             1.0000         1.0000      
+v20 .morning            .             1.0000         1.0000      
+v20 .afternoon          .             1.0000         1.0000      
+v20 .evening            .             1.0000         1.0000      
+v21 .morning            .             1.0000         1.0000      
+v21 .afternoon          .             1.0000         1.0000      
+v21 .evening            .             1.0000         1.0000      
+v22 .morning            .             1.0000         1.0000      
+v22 .afternoon          .             1.0000         1.0000      
+v22 .evening            .             1.0000         1.0000      
+v23 .morning            .             1.0000         1.0000      
+v23 .afternoon          .             1.0000         1.0000      
+v23 .evening            .             1.0000         1.0000      
+v24 .morning            .             1.0000         1.0000      
+v24 .afternoon          .              .             1.0000      
+v24 .evening            .             1.0000         1.0000      
+v25 .morning            .             1.0000         1.0000      
+v25 .afternoon          .              .             1.0000      
+v25 .evening            .             1.0000         1.0000      
+v26 .morning            .             1.0000         1.0000      
+v26 .afternoon          .             1.0000         1.0000      
+v26 .evening            .             1.0000         1.0000      
+v27 .morning            .             1.0000         1.0000      
+v27 .afternoon          .             1.0000         1.0000      
+v27 .evening            .             1.0000         1.0000      
+v28 .morning            .             1.0000         1.0000      
+v28 .afternoon          .             1.0000         1.0000      
+v28 .evening            .             1.0000         1.0000      
+v29 .morning            .             1.0000         1.0000      
+v29 .afternoon          .             1.0000         1.0000      
+v29 .evening            .             1.0000         1.0000      
+v30 .morning            .             1.0000         1.0000      
+v30 .afternoon          .             1.0000         1.0000      
+v30 .evening            .             1.0000         1.0000      
+v31 .morning            .             1.0000         1.0000      
+v31 .afternoon          .             1.0000         1.0000      
+v31 .evening            .             1.0000         1.0000      
+v32 .morning            .             1.0000         1.0000      
+v32 .afternoon          .             1.0000         1.0000      
+v32 .evening            .             1.0000         1.0000      
+v33 .morning            .             1.0000         1.0000      
+v33 .afternoon          .             1.0000         1.0000      
+v33 .evening            .             1.0000         1.0000      
+v34 .morning            .             1.0000         1.0000      
+v34 .afternoon          .             1.0000         1.0000      
+v34 .evening            .             1.0000         1.0000      
+v35 .morning            .             1.0000         1.0000      
+v35 .afternoon          .             1.0000         1.0000      
+v35 .evening            .             1.0000         1.0000      
+v36 .morning            .             1.0000         1.0000      
+v36 .afternoon          .              .             1.0000      
+v36 .evening            .             1.0000         1.0000      
+v37 .morning            .             1.0000         1.0000      
+v37 .afternoon          .              .             1.0000      
+v37 .evening            .             1.0000         1.0000      
+v38 .morning            .             1.0000         1.0000      
+v38 .afternoon          .              .             1.0000      
+v38 .evening            .              .             1.0000      
+v39 .morning            .             1.0000         1.0000      
+v39 .afternoon          .             1.0000         1.0000      
+v39 .evening            .             1.0000         1.0000      
+v40 .morning            .             1.0000         1.0000      
+v40 .afternoon          .             1.0000         1.0000      
+v40 .evening            .             1.0000         1.0000      
+v41 .morning            .             1.0000         1.0000      
+v41 .afternoon          .             1.0000         1.0000      
+v41 .evening            .             1.0000         1.0000      
+v42 .morning            .             1.0000         1.0000      
+v42 .afternoon          .             1.0000         1.0000      
+v42 .evening            .             1.0000         1.0000      
+v43 .morning            .              .             1.0000      
+v43 .afternoon          .             1.0000         1.0000      
+v43 .evening            .             1.0000         1.0000      
+v44 .morning            .              .             1.0000      
+v44 .afternoon          .             1.0000         1.0000      
+v44 .evening            .             1.0000         1.0000      
+v45 .morning            .              .             1.0000      
+v45 .afternoon          .             1.0000         1.0000      
+v45 .evening            .             1.0000         1.0000      
+v46 .morning            .              .             1.0000      
+v46 .afternoon          .             1.0000         1.0000      
+v46 .evening            .             1.0000         1.0000      
+v47 .morning            .              .             1.0000      
+v47 .afternoon          .             1.0000         1.0000      
+v47 .evening            .             1.0000         1.0000      
+v48 .morning            .              .             1.0000      
+v48 .afternoon          .             1.0000         1.0000      
+v48 .evening            .             1.0000         1.0000      
+v49 .morning            .              .             1.0000      
+v49 .afternoon          .              .             1.0000      
+v49 .evening            .             1.0000         1.0000      
+v50 .morning            .              .             1.0000      
+v50 .afternoon          .              .             1.0000      
+v50 .evening            .              .             1.0000      
+v51 .morning            .             1.0000         1.0000      
+v51 .afternoon          .              .             1.0000      
+v51 .evening            .             1.0000         1.0000      
+v52 .morning            .             1.0000         1.0000      
+v52 .afternoon          .              .             1.0000      
+v52 .evening            .             1.0000         1.0000      
+v53 .morning            .             1.0000         1.0000      
+v53 .afternoon          .              .             1.0000      
+v53 .evening            .             1.0000         1.0000      
+v54 .morning            .             1.0000         1.0000      
+v54 .afternoon          .              .             1.0000      
+v54 .evening            .             1.0000         1.0000      
+v55 .morning            .              .             1.0000      
+v55 .afternoon          .              .             1.0000      
+v55 .evening            .             1.0000         1.0000      
+v56 .morning            .              .             1.0000      
+v56 .afternoon          .              .             1.0000      
+v56 .evening            .             1.0000         1.0000      
+v57 .morning            .              .             1.0000      
+v57 .afternoon          .              .             1.0000      
+v57 .evening            .             1.0000         1.0000      
+v58 .morning            .              .             1.0000      
+v58 .afternoon          .              .             1.0000      
+v58 .evening            .             1.0000         1.0000      
+v59 .morning            .              .             1.0000      
+v59 .afternoon          .              .             1.0000      
+v59 .evening            .             1.0000         1.0000      
+v60 .morning            .              .             1.0000      
+v60 .afternoon          .              .             1.0000      
+v60 .evening            .             1.0000         1.0000      
+v61 .morning            .              .             1.0000      
+v61 .afternoon          .              .             1.0000      
+v61 .evening            .             1.0000         1.0000      
+v62 .morning            .              .             1.0000      
+v62 .afternoon          .              .             1.0000      
+v62 .evening            .             1.0000         1.0000      
+v63 .morning            .             1.0000         1.0000      
+v63 .afternoon          .              .             1.0000      
+v63 .evening            .              .             1.0000      
+v64 .morning            .             1.0000         1.0000      
+v64 .afternoon          .              .             1.0000      
+v64 .evening            .              .             1.0000      
+v65 .morning            .             1.0000         1.0000      
+v65 .afternoon          .              .             1.0000      
+v65 .evening            .              .             1.0000      
+v66 .morning            .             1.0000         1.0000      
+v66 .afternoon          .              .             1.0000      
+v66 .evening            .              .             1.0000      
+v67 .morning            .              .             1.0000      
+v67 .afternoon          .              .             1.0000      
+v67 .evening            .              .             1.0000      
+v68 .morning            .              .             1.0000      
+v68 .afternoon          .              .             1.0000      
+v68 .evening            .              .             1.0000      
+v69 .morning            .              .             1.0000      
+v69 .afternoon          .              .             1.0000      
+v69 .evening            .              .             1.0000      
+v70 .morning            .              .             1.0000      
+v70 .afternoon          .              .             1.0000      
+v70 .evening            .              .             1.0000      
+v71 .morning            .              .             1.0000      
+v71 .afternoon          .              .             1.0000      
+v71 .evening            .              .             1.0000      
+v72 .morning            .              .             1.0000      
+v72 .afternoon          .              .             1.0000      
+v72 .evening            .              .             1.0000      
+v73 .morning            .              .             1.0000      
+v73 .afternoon          .              .             1.0000      
+v73 .evening            .              .             1.0000      
+v74 .morning            .              .             1.0000      
+v74 .afternoon          .              .             1.0000      
+v74 .evening            .              .             1.0000      
+v75 .morning            .              .             1.0000      
+v75 .afternoon          .              .             1.0000      
+v75 .evening            .              .             1.0000      
+v76 .morning            .              .             1.0000      
+v76 .afternoon          .              .             1.0000      
+v76 .evening            .              .             1.0000      
+v77 .morning            .              .             1.0000      
+v77 .afternoon          .              .             1.0000      
+v77 .evening            .              .             1.0000      
+v78 .morning            .              .             1.0000      
+v78 .afternoon          .              .             1.0000      
+v78 .evening            .              .             1.0000      
+v79 .morning            .              .             1.0000      
+v79 .afternoon          .              .             1.0000      
+v79 .evening            .              .             1.0000      
+v80 .morning            .              .             1.0000      
+v80 .afternoon          .              .             1.0000      
+v80 .evening            .              .             1.0000      
+v81 .morning            .              .             1.0000      
+v81 .afternoon          .              .             1.0000      
+v81 .evening            .              .             1.0000      
+v82 .morning            .              .             1.0000      
+v82 .afternoon          .              .             1.0000      
+v82 .evening            .              .             1.0000      
+v83 .morning            .              .             1.0000      
+v83 .afternoon          .              .             1.0000      
+v83 .evening            .              .             1.0000      
+v84 .morning            .              .             1.0000      
+v84 .afternoon          .              .             1.0000      
+v84 .evening            .              .             1.0000      
+v85 .morning            .              .             1.0000      
+v85 .afternoon          .              .             1.0000      
+v85 .evening            .              .             1.0000      
+v86 .morning            .              .             1.0000      
+v86 .afternoon          .              .             1.0000      
+v86 .evening            .              .             1.0000      
+v87 .morning            .              .             1.0000      
+v87 .afternoon          .              .             1.0000      
+v87 .evening            .              .             1.0000      
+v88 .morning            .              .             1.0000      
+v88 .afternoon          .              .             1.0000      
+v88 .evening            .              .             1.0000      
+v89 .morning            .              .             1.0000      
+v89 .afternoon          .              .             1.0000      
+v89 .evening            .              .             1.0000      
+v90 .morning            .              .             1.0000      
+v90 .afternoon          .              .             1.0000      
+v90 .evening            .              .             1.0000      
+v91 .morning            .              .             1.0000      
+v91 .afternoon          .              .             1.0000      
+v91 .evening            .              .             1.0000      
+v92 .morning            .              .             1.0000      
+v92 .afternoon          .              .             1.0000      
+v92 .evening            .              .             1.0000      
+v93 .morning            .              .             1.0000      
+v93 .afternoon          .              .             1.0000      
+v93 .evening            .              .             1.0000      
+v94 .morning            .              .             1.0000      
+v94 .afternoon          .              .             1.0000      
+v94 .evening            .              .             1.0000      
+v95 .morning            .              .             1.0000      
+v95 .afternoon          .              .             1.0000      
+v95 .evening            .              .             1.0000      
+v96 .morning            .              .             1.0000      
+v96 .afternoon          .              .             1.0000      
+v96 .evening            .              .             1.0000      
+v97 .morning            .              .             1.0000      
+v97 .afternoon          .              .             1.0000      
+v97 .evening            .              .             1.0000      
+v98 .morning            .              .             1.0000      
+v98 .afternoon          .              .             1.0000      
+v98 .evening            .              .             1.0000      
+v99 .morning            .              .             1.0000      
+v99 .afternoon          .              .             1.0000      
+v99 .evening            .              .             1.0000      
+v100.morning            .              .             1.0000      
+v100.afternoon          .              .             1.0000      
+v100.evening            .              .             1.0000      
+
+---- VAR trips  
+
+                      LOWER          LEVEL          UPPER
+
+v1  .morning            .             4.0000         4.0000      
+v1  .afternoon          .             4.0000         4.0000      
+v1  .evening            .             4.0000         4.0000      
+v2  .morning            .             4.0000         4.0000      
+v2  .afternoon          .             4.0000         4.0000      
+v2  .evening            .             4.0000         4.0000      
+v3  .morning            .             4.0000         4.0000      
+v3  .afternoon          .             4.0000         4.0000      
+v3  .evening            .             4.0000         4.0000      
+v4  .morning            .             4.0000         4.0000      
+v4  .afternoon          .             4.0000         4.0000      
+v4  .evening            .             4.0000         4.0000      
+v5  .morning            .             4.0000         4.0000      
+v5  .afternoon          .             4.0000         4.0000      
+v5  .evening            .             4.0000         4.0000      
+v6  .morning            .             4.0000         4.0000      
+v6  .afternoon          .             4.0000         4.0000      
+v6  .evening            .             4.0000         4.0000      
+v7  .morning            .             4.0000         4.0000      
+v7  .afternoon          .             4.0000         4.0000      
+v7  .evening            .             4.0000         4.0000      
+v8  .morning            .             4.0000         4.0000      
+v8  .afternoon          .             4.0000         4.0000      
+v8  .evening            .             4.0000         4.0000      
+v9  .morning            .             4.0000         4.0000      
+v9  .afternoon          .             4.0000         4.0000      
+v9  .evening            .             4.0000         4.0000      
+v10 .morning            .             4.0000         4.0000      
+v10 .afternoon          .             4.0000         4.0000      
+v10 .evening            .             4.0000         4.0000      
+v11 .morning            .             4.0000         4.0000      
+v11 .afternoon          .             4.0000         4.0000      
+v11 .evening            .             4.0000         4.0000      
+v12 .morning            .             4.0000         4.0000      
+v12 .afternoon          .             4.0000         4.0000      
+v12 .evening            .             4.0000         4.0000      
+v13 .morning            .             4.0000         4.0000      
+v13 .afternoon          .             4.0000         4.0000      
+v13 .evening            .             4.0000         4.0000      
+v14 .morning            .             4.0000         4.0000      
+v14 .afternoon          .             4.0000         4.0000      
+v14 .evening            .             4.0000         4.0000      
+v15 .morning            .             4.0000         4.0000      
+v15 .afternoon          .             4.0000         4.0000      
+v15 .evening            .             4.0000         4.0000      
+v16 .morning            .             4.0000         4.0000      
+v16 .afternoon          .             4.0000         4.0000      
+v16 .evening            .             4.0000         4.0000      
+v17 .morning            .             4.0000         4.0000      
+v17 .afternoon          .             4.0000         4.0000      
+v17 .evening            .             4.0000         4.0000      
+v18 .morning            .             4.0000         4.0000      
+v18 .afternoon          .             4.0000         4.0000      
+v18 .evening            .             4.0000         4.0000      
+v19 .morning            .             4.0000         4.0000      
+v19 .afternoon          .             4.0000         4.0000      
+v19 .evening            .             4.0000         4.0000      
+v20 .morning            .             4.0000         4.0000      
+v20 .afternoon          .             4.0000         4.0000      
+v20 .evening            .             4.0000         4.0000      
+v21 .morning            .             4.0000         4.0000      
+v21 .afternoon          .             4.0000         4.0000      
+v21 .evening            .             4.0000         4.0000      
+v22 .morning            .             4.0000         4.0000      
+v22 .afternoon          .             4.0000         4.0000      
+v22 .evening            .             4.0000         4.0000      
+v23 .morning            .             4.0000         4.0000      
+v23 .afternoon          .             4.0000         4.0000      
+v23 .evening            .             4.0000         4.0000      
+v24 .morning            .             4.0000         4.0000      
+v24 .afternoon          .              .             4.0000      
+v24 .evening            .             4.0000         4.0000      
+v25 .morning            .             4.0000         4.0000      
+v25 .afternoon          .              .             4.0000      
+v25 .evening            .             4.0000         4.0000      
+v26 .morning            .             4.0000         4.0000      
+v26 .afternoon          .             4.0000         4.0000      
+v26 .evening            .             4.0000         4.0000      
+v27 .morning            .             4.0000         4.0000      
+v27 .afternoon          .             4.0000         4.0000      
+v27 .evening            .             4.0000         4.0000      
+v28 .morning            .             4.0000         4.0000      
+v28 .afternoon          .             4.0000         4.0000      
+v28 .evening            .             4.0000         4.0000      
+v29 .morning            .             4.0000         4.0000      
+v29 .afternoon          .             4.0000         4.0000      
+v29 .evening            .             4.0000         4.0000      
+v30 .morning            .             4.0000         4.0000      
+v30 .afternoon          .             4.0000         4.0000      
+v30 .evening            .             4.0000         4.0000      
+v31 .morning            .             4.0000         4.0000      
+v31 .afternoon          .             4.0000         4.0000      
+v31 .evening            .             4.0000         4.0000      
+v32 .morning            .             4.0000         4.0000      
+v32 .afternoon          .             4.0000         4.0000      
+v32 .evening            .             4.0000         4.0000      
+v33 .morning            .             4.0000         4.0000      
+v33 .afternoon          .             4.0000         4.0000      
+v33 .evening            .             4.0000         4.0000      
+v34 .morning            .             4.0000         4.0000      
+v34 .afternoon          .             4.0000         4.0000      
+v34 .evening            .             4.0000         4.0000      
+v35 .morning            .             4.0000         4.0000      
+v35 .afternoon          .             4.0000         4.0000      
+v35 .evening            .             4.0000         4.0000      
+v36 .morning            .             4.0000         4.0000      
+v36 .afternoon          .              .             4.0000      
+v36 .evening            .             4.0000         4.0000      
+v37 .morning            .             4.0000         4.0000      
+v37 .afternoon          .              .             4.0000      
+v37 .evening            .             4.0000         4.0000      
+v38 .morning            .             4.0000         4.0000      
+v38 .afternoon          .              .             4.0000      
+v38 .evening            .              .             4.0000      
+v39 .morning            .             4.0000         4.0000      
+v39 .afternoon          .             4.0000         4.0000      
+v39 .evening            .             4.0000         4.0000      
+v40 .morning            .             4.0000         4.0000      
+v40 .afternoon          .             4.0000         4.0000      
+v40 .evening            .             4.0000         4.0000      
+v41 .morning            .             4.0000         4.0000      
+v41 .afternoon          .             4.0000         4.0000      
+v41 .evening            .             4.0000         4.0000      
+v42 .morning            .             4.0000         4.0000      
+v42 .afternoon          .             4.0000         4.0000      
+v42 .evening            .             4.0000         4.0000      
+v43 .morning            .              .             4.0000      
+v43 .afternoon          .             4.0000         4.0000      
+v43 .evening            .             4.0000         4.0000      
+v44 .morning            .              .             4.0000      
+v44 .afternoon          .             4.0000         4.0000      
+v44 .evening            .             4.0000         4.0000      
+v45 .morning            .              .             4.0000      
+v45 .afternoon          .             4.0000         4.0000      
+v45 .evening            .             4.0000         4.0000      
+v46 .morning            .              .             4.0000      
+v46 .afternoon          .             4.0000         4.0000      
+v46 .evening            .             4.0000         4.0000      
+v47 .morning            .              .             4.0000      
+v47 .afternoon          .             4.0000         4.0000      
+v47 .evening            .             4.0000         4.0000      
+v48 .morning            .              .             4.0000      
+v48 .afternoon          .             2.0000         4.0000      
+v48 .evening            .             4.0000         4.0000      
+v49 .morning            .              .             4.0000      
+v49 .afternoon          .              .             4.0000      
+v49 .evening            .             4.0000         4.0000      
+v50 .morning            .              .             4.0000      
+v50 .afternoon          .              .             4.0000      
+v50 .evening            .              .             4.0000      
+v51 .morning            .             4.0000         4.0000      
+v51 .afternoon          .              .             4.0000      
+v51 .evening            .             4.0000         4.0000      
+v52 .morning            .             4.0000         4.0000      
+v52 .afternoon          .              .             4.0000      
+v52 .evening            .             4.0000         4.0000      
+v53 .morning            .             4.0000         4.0000      
+v53 .afternoon          .              .             4.0000      
+v53 .evening            .             4.0000         4.0000      
+v54 .morning            .             4.0000         4.0000      
+v54 .afternoon          .              .             4.0000      
+v54 .evening            .             4.0000         4.0000      
+v55 .morning            .              .             4.0000      
+v55 .afternoon          .              .             4.0000      
+v55 .evening            .             4.0000         4.0000      
+v56 .morning            .              .             4.0000      
+v56 .afternoon          .              .             4.0000      
+v56 .evening            .             4.0000         4.0000      
+v57 .morning            .              .             4.0000      
+v57 .afternoon          .              .             4.0000      
+v57 .evening            .             4.0000         4.0000      
+v58 .morning            .              .             4.0000      
+v58 .afternoon          .              .             4.0000      
+v58 .evening            .             4.0000         4.0000      
+v59 .morning            .              .             4.0000      
+v59 .afternoon          .              .             4.0000      
+v59 .evening            .             4.0000         4.0000      
+v60 .morning            .              .             4.0000      
+v60 .afternoon          .              .             4.0000      
+v60 .evening            .             4.0000         4.0000      
+v61 .morning            .              .             4.0000      
+v61 .afternoon          .              .             4.0000      
+v61 .evening            .             4.0000         4.0000      
+v62 .morning            .              .             4.0000      
+v62 .afternoon          .              .             4.0000      
+v62 .evening            .             4.0000         4.0000      
+v63 .morning            .             4.0000         4.0000      
+v63 .afternoon          .              .             4.0000      
+v63 .evening            .              .             4.0000      
+v64 .morning            .             4.0000         4.0000      
+v64 .afternoon          .              .             4.0000      
+v64 .evening            .              .             4.0000      
+v65 .morning            .             4.0000         4.0000      
+v65 .afternoon          .              .             4.0000      
+v65 .evening            .              .             4.0000      
+v66 .morning            .             4.0000         4.0000      
+v66 .afternoon          .              .             4.0000      
+v66 .evening            .              .             4.0000      
+v67 .morning            .              .             4.0000      
+v67 .afternoon          .              .             4.0000      
+v67 .evening            .              .             4.0000      
+v68 .morning            .              .             4.0000      
+v68 .afternoon          .              .             4.0000      
+v68 .evening            .              .             4.0000      
+v69 .morning            .              .             4.0000      
+v69 .afternoon          .              .             4.0000      
+v69 .evening            .              .             4.0000      
+v70 .morning            .              .             4.0000      
+v70 .afternoon          .              .             4.0000      
+v70 .evening            .              .             4.0000      
+v71 .morning            .              .             4.0000      
+v71 .afternoon          .              .             4.0000      
+v71 .evening            .              .             4.0000      
+v72 .morning            .              .             4.0000      
+v72 .afternoon          .              .             4.0000      
+v72 .evening            .              .             4.0000      
+v73 .morning            .              .             4.0000      
+v73 .afternoon          .              .             4.0000      
+v73 .evening            .              .             4.0000      
+v74 .morning            .              .             4.0000      
+v74 .afternoon          .              .             4.0000      
+v74 .evening            .              .             4.0000      
+v75 .morning            .              .             4.0000      
+v75 .afternoon          .              .             4.0000      
+v75 .evening            .              .             4.0000      
+v76 .morning            .              .             4.0000      
+v76 .afternoon          .              .             4.0000      
+v76 .evening            .              .             4.0000      
+v77 .morning            .              .             4.0000      
+v77 .afternoon          .              .             4.0000      
+v77 .evening            .              .             4.0000      
+v78 .morning            .              .             4.0000      
+v78 .afternoon          .              .             4.0000      
+v78 .evening            .              .             4.0000      
+v79 .morning            .              .             4.0000      
+v79 .afternoon          .              .             4.0000      
+v79 .evening            .              .             4.0000      
+v80 .morning            .              .             4.0000      
+v80 .afternoon          .              .             4.0000      
+v80 .evening            .              .             4.0000      
+v81 .morning            .              .             4.0000      
+v81 .afternoon          .              .             4.0000      
+v81 .evening            .              .             4.0000      
+v82 .morning            .              .             4.0000      
+v82 .afternoon          .              .             4.0000      
+v82 .evening            .              .             4.0000      
+v83 .morning            .              .             4.0000      
+v83 .afternoon          .              .             4.0000      
+v83 .evening            .              .             4.0000      
+v84 .morning            .              .             4.0000      
+v84 .afternoon          .              .             4.0000      
+v84 .evening            .              .             4.0000      
+v85 .morning            .              .             4.0000      
+v85 .afternoon          .              .             4.0000      
+v85 .evening            .              .             4.0000      
+v86 .morning            .              .             4.0000      
+v86 .afternoon          .              .             4.0000      
+v86 .evening            .              .             4.0000      
+v87 .morning            .              .             4.0000      
+v87 .afternoon          .              .             4.0000      
+v87 .evening            .              .             4.0000      
+v88 .morning            .              .             4.0000      
+v88 .afternoon          .              .             4.0000      
+v88 .evening            .              .             4.0000      
+v89 .morning            .              .             4.0000      
+v89 .afternoon          .              .             4.0000      
+v89 .evening            .              .             4.0000      
+v90 .morning            .              .             4.0000      
+v90 .afternoon          .              .             4.0000      
+v90 .evening            .              .             4.0000      
+v91 .morning            .              .             4.0000      
+v91 .afternoon          .              .             4.0000      
+v91 .evening            .              .             4.0000      
+v92 .morning            .              .             4.0000      
+v92 .afternoon          .              .             4.0000      
+v92 .evening            .              .             4.0000      
+v93 .morning            .              .             4.0000      
+v93 .afternoon          .              .             4.0000      
+v93 .evening            .              .             4.0000      
+v94 .morning            .              .             4.0000      
+v94 .afternoon          .              .             4.0000      
+v94 .evening            .              .             4.0000      
+v95 .morning            .              .             4.0000      
+v95 .afternoon          .              .             4.0000      
+v95 .evening            .              .             4.0000      
+v96 .morning            .              .             4.0000      
+v96 .afternoon          .              .             4.0000      
+v96 .evening            .              .             4.0000      
+v97 .morning            .              .             4.0000      
+v97 .afternoon          .              .             4.0000      
+v97 .evening            .              .             4.0000      
+v98 .morning            .              .             4.0000      
+v98 .afternoon          .              .             4.0000      
+v98 .evening            .              .             4.0000      
+v99 .morning            .              .             4.0000      
+v99 .afternoon          .              .             4.0000      
+v99 .evening            .              .             4.0000      
+v100.morning            .              .             4.0000      
+v100.afternoon          .              .             4.0000      
+v100.evening            .              .             4.0000      
+
+                           LOWER          LEVEL          UPPER
+
+---- VAR profit            -INF        18260.0000        +INF         
+
+
+**** REPORT SUMMARY :        0     NONOPT
+                             0 INFEASIBLE
+                             0  UNBOUNDED
+GAMS 54.7.0  8b4e16d1 Nov 9, 2026           WEX-WEI x86 64bit/MS Windows - 11/19/26 13:17:04 Page 7
+G e n e r a l   A l g e b r a i c   M o d e l i n g   S y s t e m
+E x e c u t i o n
+
+
+----     99 VARIABLE profit.L              =    18260.000  
+
+----     99 PARAMETER deployed  
+
+morning   50.000,    afternoon 43.000,    evening   60.000
+
+
+----     99 PARAMETER served  
+
+morning   200.000,    afternoon 170.000,    evening   240.000
+
+
+----     99 PARAMETER totalTrips           =      610.000  
+
+
+EXECUTION TIME       =        1.094 SECONDS      4 MB  54.7.0 8b4e16d1 WEX-WEI
+
+
+USER: Course License                                 G260818+0003Ac-GEN
+      Utah State University                                     DCE5615
+      License for teaching and research at degree granting institutions
+
+
+**** FILE SUMMARY
+
+Input      C:\Users\A02511010\Documents\GAMS\Project\Robotaxi.gms
+Output     C:\Users\A02511010\Documents\GAMS\Project\Robotaxi.lst

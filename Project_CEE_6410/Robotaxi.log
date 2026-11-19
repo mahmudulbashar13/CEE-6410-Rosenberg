@@ -1,0 +1,122 @@
+--- Job Robotaxi.gms Start 11/19/26 13:17:04 54.7.0 8b4e16d1 WEX-WEI x86 64bit/MS Windows
+--- Applying:
+    C:\GAMS\54\gmsprmNT.txt
+--- GAMS Parameters defined
+    Input C:\Users\A02511010\Documents\GAMS\Project\Robotaxi.gms
+    PageSize 0
+    ScrDir C:\Users\A02511010\Documents\GAMS\Project\225a\
+    SysDir C:\GAMS\54\
+    LogOption 3
+    AppendLog 1
+    ErrMsg 1
+    ErrorLog 99
+    IDE 1
+    LstTitleLeftAligned 1
+Licensee: Course License                                 G260818+0003Ac-GEN
+          Utah State University                                     DCE5615
+          225a\gamslice.dat
+          1d9a2824-f32d-4897
+          node:87131205 mem:32 cores:8 ipport:63236 v:2                    
+          Course license for use within the course and related course work
+          The time-limited license stops working on : Jun 14, 2027
+System information: 8 physical cores and 32 Gb physical memory detected
+GAMS 54.7.0   Copyright (C) 1987-2026 GAMS Development. All rights reserved
+--- Starting compilation
+--- Robotaxi.gms(99) 3 Mb
+--- Starting execution: elapsed 0:00:00.026
+--- Robotaxi.gms(77) 4 Mb
+--- Generating MIP model deployModel
+--- Robotaxi.gms(92) 4 Mb
+---   304 rows  601 columns  1,501 non-zeroes
+---   600 discrete-columns
+--- Range statistics (absolute non-zero finite values)
+--- RHS       [min, max] : [ 1.700E+02, 2.400E+02] - Zero values observed as well
+--- Bound     [min, max] : [ 1.000E+00, 4.000E+00] - Zero values observed as well
+--- Matrix    [min, max] : [ 1.000E+00, 8.000E+01]
+--- Executing CPLEX (Solvelink=2): elapsed 0:00:00.040
+
+IBM ILOG CPLEX   54.7.0 8b4e16d1 Nov 9, 2026           WEI x86 64bit/MS Window
+
+*** This solver runs with a community license.
+--- GMO setup time: 0.00s
+--- Space for names approximately 0.02 Mb
+--- Use option 'names no' to turn use of names off
+--- GMO memory 0.60 Mb (peak 0.61 Mb)
+--- Dictionary memory 0.00 Mb
+--- Cplex 22.2.0.1 link memory 0.01 Mb (peak 0.06 Mb)
+--- Starting Cplex
+
+Version identifier: 22.2.0.1 | 2026-10-22 | 48afc4248
+CPXPARAM_Advance                                 0
+CPXPARAM_MIP_Display                             4
+CPXPARAM_MIP_Pool_Capacity                       0
+CPXPARAM_Preprocessing_QCPDuals                  0
+CPXPARAM_MIP_Tolerances_AbsMIPGap                0
+Generic callback                                 0x50
+Found incumbent of value 0.000000 after 0.00 sec. (0.01 ticks)
+Tried aggregator 1 time.
+MIP Presolve eliminated 0 rows and 1 columns.
+Reduced MIP has 303 rows, 600 columns, and 900 nonzeros.
+Reduced MIP has 300 binaries, 300 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.00 sec. (1.68 ticks)
+Probing time = 0.00 sec. (0.06 ticks)
+Tried aggregator 1 time.
+Detecting symmetries...
+Reduced MIP has 303 rows, 600 columns, and 900 nonzeros.
+Reduced MIP has 300 binaries, 300 generals, 0 SOSs, and 0 indicators.
+Presolve time = 0.00 sec. (2.20 ticks)
+Probing time = 0.00 sec. (0.06 ticks)
+MIP emphasis: balance optimality and feasibility.
+MIP search method: dynamic search.
+Parallel mode: deterministic, using up to 16 threads.
+Parallel mode: deterministic, using up to 3 threads for parallel tasks at root LP.
+Tried aggregator 1 time.
+LP Presolve eliminated 303 rows and 600 columns.
+All rows and columns eliminated.
+Presolve time = 0.00 sec. (0.20 ticks)
+Initializing dual steep norms . . .
+Root relaxation solution time = 0.00 sec. (0.31 ticks)
+
+        Nodes                                         Cuts/
+   Node  Left     Objective  IInf  Best Integer    Best Bound    ItCnt     Gap
+
+*     0+    0                            0.0000    60000.0000              --- 
+Found incumbent of value 0.000000 after 0.20 sec. (102.14 ticks)
+      0     0    18300.0000     1        0.0000    18300.0000        0     --- 
+*     0+    0                        18260.0000    18300.0000             0.22%
+Found incumbent of value 18260.000000 after 0.20 sec. (102.78 ticks)
+      0     0    18300.0000     1    18260.0000       Cuts: 2        1    0.22%
+      0     0    18300.0000     1    18260.0000       Cuts: 2        3    0.22%
+      0     2    18300.0000     1    18260.0000    18300.0000        3    0.22%
+Elapsed time = 0.38 sec. (203.71 ticks, tree = 0.02 MB)
+
+Flow cuts applied:  2
+Gomory fractional cuts applied:  2
+
+Root node processing (before b&c):
+  Real time             =    0.36 sec. (203.55 ticks)
+Parallel b&c, 16 threads:
+  Real time             =    0.53 sec. (8.33 ticks)
+  Sync time (average)   =    0.51 sec.
+  Wait time (average)   =    0.00 sec.
+                          ------------
+Total (root+branch&cut) =    0.89 sec. (211.88 ticks)
+
+--- MIP status (101): integer optimal solution.
+--- Cplex Time: 0.89sec (det. 211.88 ticks)
+
+
+Proven optimal solution
+MIP Solution:        18260.000000    (87 iterations, 86 nodes)
+
+Best possible:       18260.000000
+Absolute gap:            0.000000
+Relative gap:            0.000000
+
+--- Reading solution for model deployModel
+--- Solver did not provide marginals for model deployModel
+--- To request marginals from the solver set option requestMarginals >= 1
+--- Executing after solve: elapsed 0:00:01.121
+--- Robotaxi.gms(99) 4 Mb
+*** Status: Normal completion
+--- Job Robotaxi.gms Stop 11/19/26 13:17:05 elapsed 0:00:01.126
